@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  RECEPTIONIST
+  CLINIC_ADMIN
+}
+
+enum QueueStatus {
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+enum EntryStatus {
+  WAITING
+  SERVING
+  COMPLETED
+  SKIPPED
+}
+
+enum QueueEventType {
+  PATIENT_ADDED
+  PATIENT_CALLED
+  PATIENT_SKIPPED
+  PATIENT_COMPLETED
+  QUEUE_UPDATED
+}
+
+model Clinic {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  queues    Queue[]
+  analytics AnalyticsRecord[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  clinicId     String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(RECEPTIONIST)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
+  @@index([email])
+}
+
+model Queue {
+  id        String      @id @default(uuid())
+  clinicId  String
+  name      String
+  status    QueueStatus @default(ACTIVE)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  clinic   Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  entries  QueueEntry[]
+  events   QueueEvent[]
+  analytics AnalyticsRecord[]
+
+  @@index([clinicId])
+  @@index([clinicId, status])
+}
+
+model QueueEntry {
+  id          String      @id @default(uuid())
+  queueId     String
+  patientName String
+  phone       String?
+  queueNumber Int
+  status      EntryStatus @default(WAITING)
+  position    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  queue  Queue        @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  events QueueEvent[]
+
+  @@unique([queueId, queueNumber])
+  @@index([queueId])
+  @@index([status])
+  @@index([queueId, status])
+  @@index([position])
+}
+
+model QueueEvent {
+  id        String         @id @default(uuid())
+  queueId   String
+  entryId   String?
+  eventType QueueEventType
+  timestamp DateTime       @default(now())
+
+  entry QueueEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
+  queue Queue     @relation(fields: [queueId], references: [id], onDelete: Cascade)
+
+  @@index([queueId])
+  @@index([entryId])
+  @@index([timestamp])
+}
+
+model AnalyticsRecord {
+  id       String   @id @default(uuid())
+  clinicId String
+  queueId  String
+  date     DateTime
+  metrics  Json
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  queue  Queue  @relation(fields: [queueId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
+  @@index([queueId])
+  @@index([date])
+}

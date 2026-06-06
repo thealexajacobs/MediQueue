@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui New York theme mapped to MediQueue design tokens */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 11%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 11%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 11%;
+    --primary: 196 68% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 203 33% 36%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 15 7% 89%;
+    --muted-foreground: 0 1% 28%;
+    --accent: 197 58% 32%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 1 77% 53%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 1% 47%;
+    --input: 20 3% 78%;
+    --ring: 196 68% 51%;
+    --radius: 0.5rem;
+  }
+
+  [data-theme='dark'],
+  .dark {
+    --background: 0 0% 11%;
+    --foreground: 0 0% 89%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 89%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 89%;
+    --primary: 196 68% 51%;
+    --primary-foreground: 195 100% 14%;
+    --secondary: 204 57% 77%;
+    --secondary-foreground: 199 85% 15%;
+    --muted: 0 1% 28%;
+    --muted-foreground: 20 3% 78%;
+    --accent: 200 72% 75%;
+    --accent-foreground: 195 100% 14%;
+    --destructive: 6 100% 84%;
+    --destructive-foreground: 357 100% 21%;
+    --border: 0 1% 57%;
+    --input: 0 1% 28%;
+    --ring: 196 68% 51%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+}
