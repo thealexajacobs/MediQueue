@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/features/auth/schemas/login';
+import { authenticate } from '@/features/auth/actions/login';
 import { Loader2 } from 'lucide-react';
 
 export function LoginForm() {
@@ -25,24 +25,28 @@ export function LoginForm() {
     setIsLoading(true);
     setError(null);
 
-    const result = await signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    });
+    const result = await authenticate(data.email, data.password);
 
-    if (result?.error) {
-      setError('Invalid email or password');
+    if ('error' in result) {
+      setError(result.error);
       setIsLoading(false);
       return;
     }
 
     router.push('/dashboard');
-    router.refresh();
+  }
+
+  function clearError() {
+    setError(null);
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-sm flex-col gap-4">
+      {error && (
+        <div className="rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {error}
+        </div>
+      )}
       <div>
         <label htmlFor="email" className="mb-1 block text-sm text-muted-foreground">
           Email
@@ -51,8 +55,9 @@ export function LoginForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="h-11 w-full rounded-sm border border-input bg-card px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
           placeholder="you@clinic.com"
+          onFocus={clearError}
           {...register('email')}
         />
         {errors.email && (
@@ -68,20 +73,15 @@ export function LoginForm() {
           id="password"
           type="password"
           autoComplete="current-password"
-          className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="h-11 w-full rounded-sm border border-input bg-card px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
           placeholder="Enter your password"
+          onFocus={clearError}
           {...register('password')}
         />
         {errors.password && (
           <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
         )}
       </div>
-
-      {error && (
-        <div className="rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
-      )}
 
       <button
         type="submit"

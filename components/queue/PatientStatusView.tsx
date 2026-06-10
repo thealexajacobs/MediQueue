@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
 import { RefreshCw, AlertCircle } from 'lucide-react';
+import type { WSQueueEvent } from '@/types';
 
 interface PublicQueueData {
   entry: {
@@ -12,6 +14,7 @@ interface PublicQueueData {
     position: number;
   };
   queue: {
+    id: string;
     name: string;
     status: string;
   };
@@ -31,8 +34,9 @@ export function PatientStatusView({ entryId }: PatientStatusViewProps) {
   const [data, setData] = useState<PublicQueueData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const socketRef = useRef<Socket | null>(null);
 
-  async function fetchStatus() {
+  const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch(`/api/queue-entries/${entryId}/public`);
       const json = await res.json();
@@ -47,13 +51,38 @@ export function PatientStatusView({ entryId }: PatientStatusViewProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [entryId]);
 
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
-  }, [entryId]);
+  }, [fetchStatus]);
+
+  useEffect(() => {
+    if (!data?.queue?.id) return;
+
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    const socket = io(socketUrl, {
+      query: { queueId: data.queue.id },
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+    });
+
+    socket.on('queue_event', (event: WSQueueEvent) => {
+      if (event.queueId === data.queue.id) {
+        fetchStatus();
+      }
+    });
+
+    socketRef.current = socket;
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [data?.queue?.id, fetchStatus]);
 
   if (error && !data) {
     return (

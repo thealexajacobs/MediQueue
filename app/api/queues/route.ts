@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { createQueueSchema } from '@/features/queues/schemas/queue';
@@ -6,13 +6,12 @@ import { requireRole } from '@/lib/auth';
 import { Role } from '@/types';
 import { UnauthorizedError, ForbiddenError } from '@/lib/errors';
 
-export async function GET() {
+export const GET = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user) throw new UnauthorizedError();
+    if (!req.auth?.user) throw new UnauthorizedError();
 
     const queues = await prisma.queue.findMany({
-      where: { clinicId: session.user.clinicId },
+      where: { clinicId: req.auth.user.clinicId },
       orderBy: { createdAt: 'asc' },
     });
 
@@ -33,14 +32,13 @@ export async function GET() {
     console.error('[queues] GET error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user) throw new UnauthorizedError();
+    if (!req.auth?.user) throw new UnauthorizedError();
 
-    requireRole(session.user, Role.CLINIC_ADMIN);
+    requireRole(req.auth.user, Role.CLINIC_ADMIN);
 
     const body = await req.json();
     const parsed = createQueueSchema.safeParse(body);
@@ -52,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     const queue = await prisma.queue.create({
       data: {
-        clinicId: session.user.clinicId,
+        clinicId: req.auth.user.clinicId,
         name: parsed.data.name,
       },
     });
@@ -68,4 +66,4 @@ export async function POST(req: NextRequest) {
     console.error('[queues] POST error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
-}
+});

@@ -45,11 +45,11 @@ function Navbar() {
             Sign in
           </Link>
           <Link
-            href="/auth?mode=register"
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
-          >
-            Get started
-          </Link>
+          href="/onboarding?fresh=1"
+          className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
+        >
+          Get started
+        </Link>
         </div>
       </div>
     </header>
@@ -88,7 +88,7 @@ function Hero() {
 
       <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Link
-          href="/auth?mode=register"
+          href="/onboarding?fresh=1"
           className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 sm:w-auto"
         >
           Start free trial

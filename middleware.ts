@@ -1,4 +1,3 @@
-import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getLoginRatelimit, getRegisterRatelimit } from '@/lib/rate-limit';
@@ -53,12 +52,6 @@ export async function middleware(req: NextRequest) {
   // Rate limiting on auth routes
   const rateLimitResponse = await handleRateLimiting(req);
   if (rateLimitResponse) return rateLimitResponse;
-
-  // Auth protection — skip for public API routes
-  const publicApiPaths = ['/api/auth/register', '/api/auth/callback/credentials', '/api/auth/session'];
-  if (path.startsWith('/api/') && !publicApiPaths.some((p) => path.startsWith(p))) {
-    return auth(req);
-  }
 
   return NextResponse.next();
 }

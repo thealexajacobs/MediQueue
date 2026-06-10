@@ -23,7 +23,7 @@ export async function recalculatePositions(queueId: string): Promise<void> {
     select: { id: true },
   });
 
-  await Promise.all(
+  await prisma.$transaction(
     waiting.map((entry, index) =>
       prisma.queueEntry.update({
         where: { id: entry.id },

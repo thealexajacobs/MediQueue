@@ -1,0 +1,52 @@
+diff --git a/node_modules/react-dom/cjs/react-dom-client.development.js b/node_modules/react-dom/cjs/react-dom-client.development.js
+index 8c860ac..f43aea8 100644
+--- a/node_modules/react-dom/cjs/react-dom-client.development.js
++++ b/node_modules/react-dom/cjs/react-dom-client.development.js
+@@ -13308,7 +13308,7 @@
+             if ((updateQueue.tag & flags) === flags) {
+               var inst = updateQueue.inst,
+                 destroy = inst.destroy;
+-              void 0 !== destroy &&
++              typeof destroy === 'function' &&
+                 ((inst.destroy = void 0),
+                 (flags & Insertion) !== NoFlags &&
+                   (isRunningInsertionEffect = !0),
+diff --git a/node_modules/react-dom/cjs/react-dom-client.production.js b/node_modules/react-dom/cjs/react-dom-client.production.js
+index bbeab5a..634e998 100644
+--- a/node_modules/react-dom/cjs/react-dom-client.production.js
++++ b/node_modules/react-dom/cjs/react-dom-client.production.js
+@@ -8605,7 +8605,7 @@ function commitHookEffectListUnmount(
+         if ((updateQueue.tag & flags) === flags) {
+           var inst = updateQueue.inst,
+             destroy = inst.destroy;
+-          if (void 0 !== destroy) {
++          if (typeof destroy === 'function') {
+             inst.destroy = void 0;
+             lastEffect = finishedWork;
+             var nearestMountedAncestor = nearestMountedAncestor$jscomp$0,
+diff --git a/node_modules/react-dom/cjs/react-dom-profiling.development.js b/node_modules/react-dom/cjs/react-dom-profiling.development.js
+index 0df4ce8..9a73975 100644
+--- a/node_modules/react-dom/cjs/react-dom-profiling.development.js
++++ b/node_modules/react-dom/cjs/react-dom-profiling.development.js
+@@ -13316,7 +13316,7 @@
+             if ((updateQueue.tag & flags) === flags) {
+               var inst = updateQueue.inst,
+                 destroy = inst.destroy;
+-              void 0 !== destroy &&
++              typeof destroy === 'function' &&
+                 ((inst.destroy = void 0),
+                 (flags & Insertion) !== NoFlags &&
+                   (isRunningInsertionEffect = !0),
+diff --git a/node_modules/react-dom/cjs/react-dom-profiling.profiling.js b/node_modules/react-dom/cjs/react-dom-profiling.profiling.js
+index 91621db..782a131 100644
+--- a/node_modules/react-dom/cjs/react-dom-profiling.profiling.js
++++ b/node_modules/react-dom/cjs/react-dom-profiling.profiling.js
+@@ -9202,7 +9202,7 @@ function commitHookEffectListUnmount(
+         if ((updateQueue.tag & flags) === flags) {
+           var inst = updateQueue.inst,
+             destroy = inst.destroy;
+-          if (void 0 !== destroy) {
++          if (typeof destroy === 'function') {
+             inst.destroy = void 0;
+             lastEffect = finishedWork;
+             var nearestMountedAncestor = nearestMountedAncestor$jscomp$0,

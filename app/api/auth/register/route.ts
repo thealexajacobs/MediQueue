@@ -6,7 +6,13 @@ import { prisma } from '@/lib/prisma';
 const registerSchema = z.object({
   clinicName: z.string().min(1, 'Clinic name is required').max(100).trim(),
   email: z.string().email('Invalid email address').trim(),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  password: z.string()
+    .min(8, 'At least 8 characters')
+    .max(128)
+    .regex(/[A-Z]/, 'Must contain an uppercase letter')
+    .regex(/[a-z]/, 'Must contain a lowercase letter')
+    .regex(/[0-9]/, 'Must contain a number')
+    .regex(/[^A-Za-z0-9]/, 'Must contain a special character'),
 });
 
 export async function POST(req: Request) {

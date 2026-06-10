@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer base {
   :root {
     /* shadcn/ui New York theme mapped to MediQueue design tokens */
@@ -25,6 +36,20 @@
     --input: 20 3% 78%;
     --ring: 196 68% 51%;
     --radius: 0.5rem;
+    --inverse-on-surface: 0 0% 94%;
+
+    --color-primary-container: 198 100% 71%;
+    --color-on-primary-container: 194 100% 20%;
+    --color-secondary-container: 204 57% 77%;
+    --color-on-secondary-container: 202 46% 26%;
+    --color-surface-variant: 15 7% 89%;
+    --color-on-surface-variant: 0 1% 28%;
+    --color-inverse-primary: 198 100% 71%;
+    --color-inverse-surface: 0 0% 19%;
+    --color-surface-dim: 0 0% 85%;
+    --color-surface-container-low: 0 0% 95%;
+    --color-surface-container: 0 0% 93%;
+    --color-surface-container-high: 0 0% 91%;
   }
 
   [data-theme='dark'],
@@ -49,6 +74,20 @@
     --input: 0 1% 28%;
     --ring: 196 68% 51%;
     --radius: 0.5rem;
+    --inverse-on-surface: 0 0% 22%;
+
+    --color-primary-container: 194 100% 20%;
+    --color-on-primary-container: 201 100% 87%;
+    --color-secondary-container: 202 46% 26%;
+    --color-on-secondary-container: 205 100% 89%;
+    --color-surface-variant: 0 1% 28%;
+    --color-on-surface-variant: 20 3% 78%;
+    --color-inverse-primary: 194 100% 26%;
+    --color-inverse-surface: 0 0% 89%;
+    --color-surface-dim: 0 0% 11%;
+    --color-surface-container-low: 0 0% 11%;
+    --color-surface-container: 0 0% 11%;
+    --color-surface-container-high: 0 0% 19%;
   }
 }
 

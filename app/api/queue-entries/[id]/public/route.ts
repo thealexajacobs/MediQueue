@@ -41,7 +41,30 @@ export async function GET(
       where: { queueId: entry.queueId, status: 'WAITING' },
     });
 
-    const avgServeMinutes = 12;
+    const recentCompleted = await prisma.queueEvent.findMany({
+      where: { queueId: entry.queueId, eventType: 'PATIENT_COMPLETED', entryId: { not: null } },
+      orderBy: { timestamp: 'desc' },
+      take: 10,
+      select: { entryId: true, timestamp: true },
+    });
+
+    let avgServeMs = 12 * 60 * 1000;
+    if (recentCompleted.length > 0) {
+      const entriesWithCreate = await Promise.all(
+        recentCompleted.map(async (ev) => {
+          const e = await prisma.queueEntry.findUnique({
+            where: { id: ev.entryId! },
+            select: { createdAt: true },
+          });
+          return e ? ev.timestamp.getTime() - new Date(e.createdAt).getTime() : null;
+        }),
+      );
+      const validDiffs = entriesWithCreate.filter((d): d is number => d !== null && d > 0);
+      if (validDiffs.length > 0) {
+        avgServeMs = validDiffs.reduce((a, b) => a + b, 0) / validDiffs.length;
+      }
+    }
+    const avgServeMinutes = Math.max(1, Math.round(avgServeMs / 60000));
     const estWaitMinutes = (position + 1) * avgServeMinutes;
 
     return NextResponse.json({
@@ -55,6 +78,7 @@ export async function GET(
           position: position + 1,
         },
         queue: {
+          id: entry.queue.id,
           name: entry.queue.name,
           status: entry.queue.status,
         },

@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { UnauthorizedError } from '@/lib/errors';
 
-export async function GET(req: NextRequest) {
+export const GET = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user) throw new UnauthorizedError();
+    if (!req.auth?.user) throw new UnauthorizedError();
 
     const { searchParams } = new URL(req.url);
     const queueId = searchParams.get('queueId');
@@ -19,33 +18,28 @@ export async function GET(req: NextRequest) {
 
     const records = await prisma.analyticsRecord.findMany({
       where: {
-        clinicId: session.user.clinicId,
+        clinicId: req.auth.user.clinicId,
         ...queueFilter,
         date: { gte: dateFrom },
       },
       orderBy: { date: 'asc' },
     });
 
+    const clinicId = req.auth.user.clinicId;
+
     const totalPatientsToday = await prisma.queueEntry.count({
       where: {
         queueId: queueId ?? undefined,
         createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+        queue: { clinicId },
       },
-    });
-
-    const avgWaitResult = await prisma.queueEvent.groupBy({
-      by: ['entryId'],
-      where: {
-        queueId: queueId ?? undefined,
-        eventType: 'PATIENT_COMPLETED',
-      },
-      _count: true,
     });
 
     const totalCompleted = await prisma.queueEntry.count({
       where: {
         queueId: queueId ?? undefined,
         status: 'COMPLETED',
+        queue: { clinicId },
       },
     });
 
@@ -56,7 +50,6 @@ export async function GET(req: NextRequest) {
         summary: {
           totalPatientsToday,
           totalCompleted,
-          totalSessions: avgWaitResult.length,
         },
       },
     });
@@ -67,4 +60,4 @@ export async function GET(req: NextRequest) {
     console.error('[analytics] GET error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
-}
+});

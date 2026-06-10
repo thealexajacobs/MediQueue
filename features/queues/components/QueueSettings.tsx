@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useQueues, useUpdateQueue, useDeleteQueue } from '@/features/queues/hooks/useQueueMutations';
-import { X, Pencil, Trash2, Check, Loader2 } from 'lucide-react';
+import { X, Pencil, Trash2, Check, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog } from '@/components/ui/Dialog';
 
 export function QueueSettings({ onClose }: { onClose: () => void }) {
   const { data: queues } = useQueues();
@@ -11,6 +12,7 @@ export function QueueSettings({ onClose }: { onClose: () => void }) {
   const deleteQueue = useDeleteQueue();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
 
   async function handleRename(id: string) {
     try {
@@ -23,13 +25,7 @@ export function QueueSettings({ onClose }: { onClose: () => void }) {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    try {
-      await deleteQueue.mutateAsync(id);
-      toast.success('Queue deleted');
-    } catch {
-      toast.error('Failed to delete queue');
-    }
+    setDeleteConfirm({ id, name });
   }
 
   return (
@@ -103,6 +99,51 @@ export function QueueSettings({ onClose }: { onClose: () => void }) {
           ))}
         </div>
       </div>
+
+      <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Delete queue">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Delete &ldquo;{deleteConfirm?.name}&rdquo;?
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                This action cannot be undone. All patients and history for this queue will be permanently removed.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setDeleteConfirm(null)}
+              className="inline-flex h-9 items-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!deleteConfirm) return;
+                try {
+                  await deleteQueue.mutateAsync(deleteConfirm.id);
+                  setDeleteConfirm(null);
+                  toast.success('Queue deleted');
+                } catch {
+                  toast.error('Failed to delete queue');
+                }
+              }}
+              disabled={deleteQueue.isPending}
+              className="inline-flex h-9 items-center gap-2 rounded-lg bg-destructive px-4 text-sm font-semibold text-destructive-foreground transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {deleteQueue.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Delete
+            </button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

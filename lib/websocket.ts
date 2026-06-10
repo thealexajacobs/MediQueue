@@ -11,9 +11,13 @@ interface EmitEventPayload {
 export async function emitQueueEvent(payload: EmitEventPayload): Promise<void> {
   try {
     const url = `${env.SOCKET_SERVER_URL}/emit`;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (env.SOCKET_AUTH_TOKEN) {
+      headers['x-socket-token'] = env.SOCKET_AUTH_TOKEN;
+    }
     await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         ...payload,
         timestamp: new Date().toISOString(),

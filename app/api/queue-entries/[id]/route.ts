@@ -1,31 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { updateEntrySchema } from '@/features/queue-entries/schemas/entry';
 import { UnauthorizedError, NotFoundError, ConflictError } from '@/lib/errors';
 import { recalculatePositions } from '@/lib/queue';
 import { emitQueueEvent } from '@/lib/websocket';
-import type { EntryStatus } from '@prisma/client';
+import { EntryStatus, QueueEventType } from '@/types';
 
 const actionStatusMap: Record<string, EntryStatus> = {
-  call: 'SERVING',
-  skip: 'SKIPPED',
-  complete: 'COMPLETED',
+  call: EntryStatus.SERVING,
+  skip: EntryStatus.SKIPPED,
+  complete: EntryStatus.COMPLETED,
 };
 
-const actionEventMap: Record<string, string> = {
-  call: 'PATIENT_CALLED',
-  skip: 'PATIENT_SKIPPED',
-  complete: 'PATIENT_COMPLETED',
+const actionEventMap: Record<string, QueueEventType> = {
+  call: QueueEventType.PATIENT_CALLED,
+  skip: QueueEventType.PATIENT_SKIPPED,
+  complete: QueueEventType.PATIENT_COMPLETED,
 };
 
-export async function PATCH(
-  req: NextRequest,
+export const PATCH = auth(async (
+  req,
   { params }: { params: Promise<{ id: string }> },
-) {
+) => {
   try {
-    const session = await auth();
-    if (!session?.user) throw new UnauthorizedError();
+    if (!req.auth?.user) throw new UnauthorizedError();
 
     const { id } = await params;
     const body = await req.json();
@@ -35,17 +34,20 @@ export async function PATCH(
     }
 
     const { action } = parsed.data;
+    const clinicId = req.auth.user.clinicId;
 
     const entry = await prisma.queueEntry.findUnique({
       where: { id },
       include: { queue: { select: { clinicId: true } } },
     });
     if (!entry) throw new NotFoundError('Entry not found');
-    if (entry.queue.clinicId !== session.user.clinicId) {
+    if (entry.queue.clinicId !== req.auth.user.clinicId) {
       return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
 
     if (action === 'call') {
+      let autoCompletedId: string | undefined;
+
       await prisma.$transaction(async (tx) => {
         await tx.$queryRaw`SELECT id FROM "Queue" WHERE id = ${entry.queueId} FOR UPDATE`;
 
@@ -53,7 +55,18 @@ export async function PATCH(
           where: { queueId: entry.queueId, status: 'SERVING' },
         });
         if (serving && serving.id !== id) {
-          throw new ConflictError('A patient is already being served');
+          await tx.queueEntry.update({
+            where: { id: serving.id },
+            data: { status: 'COMPLETED' },
+          });
+          await tx.queueEvent.create({
+            data: {
+              queueId: entry.queueId,
+              entryId: serving.id,
+              eventType: 'PATIENT_COMPLETED',
+            },
+          });
+          autoCompletedId = serving.id;
         }
 
         await tx.queueEntry.update({
@@ -70,15 +83,26 @@ export async function PATCH(
         });
       });
 
-      emitQueueEvent({
-        type: 'PATIENT_CALLED',
-        clinicId: session.user.clinicId,
+      if (autoCompletedId) {
+        await emitQueueEvent({
+          type: QueueEventType.PATIENT_COMPLETED,
+          clinicId,
+          queueId: entry.queueId,
+          entryId: autoCompletedId,
+        });
+      }
+
+      await recalculatePositions(entry.queueId);
+
+      await emitQueueEvent({
+        type: QueueEventType.PATIENT_CALLED,
+        clinicId,
         queueId: entry.queueId,
         entryId: id,
       });
     } else {
       const newStatus = actionStatusMap[action];
-      const eventType = actionEventMap[action] as string;
+      const eventType = actionEventMap[action] as QueueEventType;
 
       await prisma.$transaction(async (tx) => {
         await tx.queueEntry.update({
@@ -90,16 +114,16 @@ export async function PATCH(
           data: {
             queueId: entry.queueId,
             entryId: id,
-            eventType: eventType as 'PATIENT_SKIPPED' | 'PATIENT_COMPLETED',
+            eventType,
           },
         });
       });
 
       await recalculatePositions(entry.queueId);
 
-      emitQueueEvent({
-        type: action === 'skip' ? 'PATIENT_SKIPPED' : 'PATIENT_COMPLETED',
-        clinicId: session.user.clinicId,
+      await emitQueueEvent({
+        type: action === 'skip' ? QueueEventType.PATIENT_SKIPPED : QueueEventType.PATIENT_COMPLETED,
+        clinicId,
         queueId: entry.queueId,
         entryId: id,
       });
@@ -120,4 +144,4 @@ export async function PATCH(
     console.error('[queue-entries] PATCH error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
-}
+});

@@ -15,6 +15,5 @@ export function useQueueEntries(queueId: string | null) {
     queryKey: ['queue-entries', queueId],
     queryFn: () => fetchEntries(queueId!),
     enabled: !!queueId,
-    refetchInterval: 5_000,
   });
 }

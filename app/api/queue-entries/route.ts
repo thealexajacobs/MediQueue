@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { addPatientSchema } from '@/features/queue-entries/schemas/entry';
 import { getNextPosition, getNextQueueNumber } from '@/lib/queue';
 import { UnauthorizedError } from '@/lib/errors';
 import { emitQueueEvent } from '@/lib/websocket';
+import { QueueEventType } from '@/types';
 
-export async function GET(req: NextRequest) {
+export const GET = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user) throw new UnauthorizedError();
+    if (!req.auth?.user) throw new UnauthorizedError();
 
     const { searchParams } = new URL(req.url);
     const queueId = searchParams.get('queueId');
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
 
     const queue = await prisma.queue.findFirst({
-      where: { id: queueId, clinicId: session.user.clinicId },
+      where: { id: queueId, clinicId: req.auth.user.clinicId },
     });
     if (!queue) {
       return NextResponse.json({ success: false, message: 'Queue not found' }, { status: 404 });
@@ -38,12 +38,11 @@ export async function GET(req: NextRequest) {
     console.error('[queue-entries] GET error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user) throw new UnauthorizedError();
+    if (!req.auth?.user) throw new UnauthorizedError();
 
     const body = await req.json();
     const parsed = addPatientSchema.safeParse(body);
@@ -56,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { queueId, patientName, phone } = parsed.data;
 
     const queue = await prisma.queue.findFirst({
-      where: { id: queueId, clinicId: session.user.clinicId },
+      where: { id: queueId, clinicId: req.auth.user.clinicId },
     });
     if (!queue) {
       return NextResponse.json({ success: false, message: 'Queue not found' }, { status: 404 });
@@ -84,9 +83,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    emitQueueEvent({
-      type: 'PATIENT_ADDED',
-      clinicId: session.user.clinicId,
+    await emitQueueEvent({
+      type: QueueEventType.PATIENT_ADDED,
+      clinicId: req.auth.user.clinicId,
       queueId,
       entryId: entry.id,
     });
@@ -110,4 +109,4 @@ export async function POST(req: NextRequest) {
     console.error('[queue-entries] POST error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
-}
+});

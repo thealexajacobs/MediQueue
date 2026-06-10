@@ -11,10 +11,11 @@ async function fetchQueues(): Promise<QueueDTO[]> {
   return json.data;
 }
 
-export function useQueues() {
+export function useQueues(initialData?: QueueDTO[]) {
   return useQuery({
     queryKey: ['queues'],
     queryFn: fetchQueues,
+    initialData,
   });
 }
 

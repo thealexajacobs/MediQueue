@@ -26,7 +26,13 @@ export function useEntryMutations(queueId: string | null) {
       const previous = queryClient.getQueryData<QueueEntryDTO[]>(['queue-entries', queueId]);
       if (previous) {
         queryClient.setQueryData<QueueEntryDTO[]>(['queue-entries', queueId], (old) =>
-          old?.map((e) => (e.id === id ? { ...e, status: EntryStatus.SERVING } : e)),
+          old?.map((e) =>
+            e.id === id
+              ? { ...e, status: EntryStatus.SERVING }
+              : e.status === EntryStatus.SERVING
+                ? { ...e, status: EntryStatus.COMPLETED }
+                : e,
+          ),
         );
       }
       return { previous };

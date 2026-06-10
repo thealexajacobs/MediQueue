@@ -1,32 +1,53 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const { createHash } = require('crypto');
 
 const PORT = process.env.PORT || 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
+const SOCKET_AUTH_TOKEN = process.env.SOCKET_AUTH_TOKEN || '';
 
 const app = express();
 app.use(express.json());
+
+// Validate shared secret on emit requests
+function validateEmitAuth(req, res, next) {
+  if (!SOCKET_AUTH_TOKEN) return next();
+  const token = req.headers['x-socket-token'];
+  if (!token || token !== SOCKET_AUTH_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: CORS_ORIGIN,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
+});
+
+io.use((socket, next) => {
+  const { clinicId } = socket.handshake.query;
+  if (!clinicId) {
+    return next(new Error('clinicId is required'));
+  }
+  next();
 });
 
 io.on('connection', (socket) => {
   const { clinicId, queueId } = socket.handshake.query;
 
-  if (clinicId) socket.join(`clinic:${clinicId}`);
+  socket.join(`clinic:${clinicId}`);
   if (queueId) socket.join(`queue:${queueId}`);
 
   socket.on('subscribe_queue', (qId) => socket.join(`queue:${qId}`));
   socket.on('unsubscribe_queue', (qId) => socket.leave(`queue:${qId}`));
 });
 
-app.post('/emit', (req, res) => {
+app.post('/emit', validateEmitAuth, (req, res) => {
   const { type, clinicId, queueId, entryId, timestamp } = req.body;
 
   if (!type || !clinicId || !queueId) {

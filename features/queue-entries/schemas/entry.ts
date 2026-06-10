@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
+const phoneRegex = /^\+[1-9]\d{1,14}$/;
+
 export const addPatientSchema = z.object({
   queueId: z.string().min(1),
   patientName: z.string().min(1, 'Patient name is required').max(100).trim(),
-  phone: z.string().max(20).optional().or(z.literal('')),
+  phone: z.string().regex(phoneRegex, 'Phone must be in E.164 format (e.g. +2348012345678)').max(16).optional().or(z.literal('')),
 });
 
 export type AddPatientInput = z.infer<typeof addPatientSchema>;

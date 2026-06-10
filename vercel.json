@@ -3,8 +3,5 @@
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
-  "crons": [],
-  "env": {
-    "SKIP_ENV_VALIDATION": "true"
-  }
+  "crons": []
 }

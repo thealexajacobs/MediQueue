@@ -5,20 +5,33 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@/features/auth/schemas/register';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [completed, setCompleted] = useState<Record<string, boolean>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange',
   });
+
+  function markCompleted(field: keyof RegisterInput) {
+    return () => {
+      if (getValues(field)?.toString().trim()) {
+        setCompleted((prev) => ({ ...prev, [field]: true }));
+      }
+    };
+  }
 
   async function onSubmit(data: RegisterInput) {
     setIsLoading(true);
@@ -54,15 +67,15 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-sm flex-col gap-4">
       <div>
         <label htmlFor="clinicName" className="mb-1 block text-sm text-muted-foreground">
-          Clinic name
+          Enter Clinic Name
         </label>
         <input
           id="clinicName"
           type="text"
+          autoFocus
           autoComplete="organization"
-          className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          placeholder="Your Clinic Name"
-          {...register('clinicName')}
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${completed.clinicName ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          {...register('clinicName', { onBlur: markCompleted('clinicName') })}
         />
         {errors.clinicName && (
           <p className="mt-1 text-sm text-destructive">{errors.clinicName.message}</p>
@@ -71,15 +84,14 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="email" className="mb-1 block text-sm text-muted-foreground">
-          Email
+          Enter Email
         </label>
         <input
           id="email"
           type="email"
           autoComplete="email"
-          className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          placeholder="admin@clinic.com"
-          {...register('email')}
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${completed.email ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          {...register('email', { onBlur: markCompleted('email') })}
         />
         {errors.email && (
           <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
@@ -88,16 +100,24 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="password" className="mb-1 block text-sm text-muted-foreground">
-          Password
+          Choose Password
         </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          placeholder="At least 8 characters"
-          {...register('password')}
-        />
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+            {...register('password')}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
         {errors.password && (
           <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
         )}
@@ -105,16 +125,24 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="confirmPassword" className="mb-1 block text-sm text-muted-foreground">
-          Confirm password
+          Confirm Password
         </label>
-        <input
-          id="confirmPassword"
-          type="password"
-          autoComplete="new-password"
-          className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          placeholder="Repeat your password"
-          {...register('confirmPassword')}
-        />
+        <div className="relative">
+          <input
+            id="confirmPassword"
+            type={showConfirmPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+            {...register('confirmPassword')}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
         {errors.confirmPassword && (
           <p className="mt-1 text-sm text-destructive">{errors.confirmPassword.message}</p>
         )}

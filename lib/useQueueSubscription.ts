@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { io, Socket } from 'socket.io-client';
 import type { WSQueueEvent } from '@/types';
 
@@ -10,23 +11,13 @@ interface UseQueueSubscriptionOptions {
   enabled?: boolean;
 }
 
-interface UseQueueSubscriptionState {
-  isConnected: boolean;
-  lastEvent: WSQueueEvent | null;
-  error: string | null;
-}
-
 export function useQueueSubscription({
   clinicId,
   queueId,
   enabled = true,
 }: UseQueueSubscriptionOptions) {
   const socketRef = useRef<Socket | null>(null);
-  const [state, setState] = useState<UseQueueSubscriptionState>({
-    isConnected: false,
-    lastEvent: null,
-    error: null,
-  });
+  const queryClient = useQueryClient();
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) return;
@@ -35,36 +26,27 @@ export function useQueueSubscription({
     const socket = io(socketUrl, {
       query: { clinicId, queueId },
       transports: ['websocket', 'polling'],
-      reconnectionAttempts: Infinity,
+      reconnectionAttempts: 20,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 10000,
     });
 
     socket.on('connect', () => {
-      setState((prev) => ({ ...prev, isConnected: true, error: null }));
+      queryClient.invalidateQueries({ queryKey: ['queue-entries', queueId] });
     });
 
-    socket.on('disconnect', () => {
-      setState((prev) => ({ ...prev, isConnected: false }));
-    });
-
-    socket.on('connect_error', (err) => {
-      setState((prev) => ({ ...prev, error: err.message }));
-    });
-
-    socket.on('queue_event', (event: WSQueueEvent) => {
-      setState((prev) => ({ ...prev, lastEvent: event }));
+    socket.on('queue_event', (_event: WSQueueEvent) => {
+      queryClient.invalidateQueries({ queryKey: ['queue-entries', queueId] });
     });
 
     socketRef.current = socket;
-  }, [clinicId, queueId]);
+  }, [clinicId, queueId, queryClient]);
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
       socketRef.current.disconnect();
       socketRef.current = null;
     }
-    setState({ isConnected: false, lastEvent: null, error: null });
   }, []);
 
   useEffect(() => {
@@ -79,5 +61,5 @@ export function useQueueSubscription({
     };
   }, [enabled, connect, disconnect]);
 
-  return state;
+  return null;
 }
