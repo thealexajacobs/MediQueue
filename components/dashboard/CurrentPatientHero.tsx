@@ -31,7 +31,7 @@ export function CurrentPatientHero({
 }: CurrentPatientHeroProps) {
   if (!servingEntry) {
     return (
-      <div className="flex h-80 flex-col items-center justify-center rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="flex h-80 flex-col items-center justify-center rounded-xl border-[1.5px] border-border/30 bg-card p-6 shadow-sm">
         <div className="flex flex-col items-center gap-5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
             <Clock className="h-8 w-8 text-muted-foreground" />
@@ -54,66 +54,65 @@ export function CurrentPatientHero({
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl p-6"
+      className="relative flex h-80 flex-col overflow-hidden rounded-2xl p-8 shadow-xl"
       style={{
-        background: 'linear-gradient(135deg, hsl(0,0%,11%) 0%, hsl(0,0%,15%) 50%, hsl(196,68%,51%) 100%)',
+        background: 'linear-gradient(135deg, hsl(0,0%,11%) 0%, hsl(200, 30%, 15%) 100%)',
       }}
     >
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-30"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
+            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")',
         }}
       />
-      <div className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full" style={{ background: 'hsla(196,68%,51%,0.12)', filter: 'blur(80px)' }} />
-      <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full" style={{ background: 'hsla(196,68%,51%,0.06)', filter: 'blur(80px)' }} />
+      <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/20 blur-[100px]" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/10 blur-[100px]" />
 
-      <div className="relative flex items-start justify-between">
-        <div className="space-y-4">
+      <div className="relative flex flex-1 items-center justify-between z-10">
+        <div className="space-y-6">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-2 w-2">
-              <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="relative flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
             </span>
-            <p className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: 'hsl(198, 100%, 71%)' }}>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 drop-shadow-sm">
               Now Serving
             </p>
           </div>
 
-          <div>
-            <p className="font-mono text-7xl font-black tracking-tight text-white">
+          <div className="flex flex-col gap-1">
+            <p className="font-mono text-[5.5rem] leading-none font-black tracking-tighter text-white drop-shadow-lg">
               {pad(servingEntry.queueNumber)}
+            </p>
+            <p className="text-2xl font-bold tracking-tight text-white/90 truncate max-w-md">
+              {servingEntry.patientName}
             </p>
           </div>
 
-          <div>
-            <p className="text-2xl font-bold tracking-tight text-white/90">
-              {servingEntry.patientName}
-            </p>
-            <div className="mt-3 flex items-center gap-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1" style={{ backgroundColor: 'rgba(52,211,153,0.15)', color: 'rgb(52,211,153)', borderColor: 'rgba(52,211,153,0.2)' }}>
-                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                In consultation
-              </span>
-              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Waiting {timeSince(servingEntry.createdAt)}
-              </span>
-            </div>
+          <div className="flex items-center gap-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-400 backdrop-blur-sm">
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              In consultation
+            </span>
+            <span className="text-sm font-medium text-white/50">
+              Waiting {timeSince(servingEntry.createdAt)}
+            </span>
           </div>
         </div>
 
-        <div className="text-right">
-          <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>{queueName}</p>
-          <div className="mt-4 space-y-2">
-            <div className="rounded-lg px-3 py-2 backdrop-blur-sm" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Waiting</p>
-              <p className="text-lg font-bold text-white">{waitingCount}</p>
+        <div className="flex flex-col items-end gap-6">
+          <p className="rounded-full bg-white/5 px-4 py-1.5 text-sm font-semibold text-white/80 border border-white/10 backdrop-blur-md shadow-sm">
+            {queueName}
+          </p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-6 rounded-xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-md shadow-sm min-w-[140px] transition-transform hover:scale-105">
+              <p className="text-sm font-medium text-white/60">Waiting</p>
+              <p className="text-2xl font-bold text-white">{waitingCount}</p>
             </div>
-            <div className="rounded-lg px-3 py-2 backdrop-blur-sm" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Total</p>
-              <p className="text-lg font-bold text-white">{totalEntries}</p>
+            <div className="flex items-center justify-between gap-6 rounded-xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-md shadow-sm min-w-[140px] transition-transform hover:scale-105">
+              <p className="text-sm font-medium text-white/60">Total</p>
+              <p className="text-2xl font-bold text-white">{totalEntries}</p>
             </div>
           </div>
         </div>

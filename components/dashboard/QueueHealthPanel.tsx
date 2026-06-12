@@ -73,7 +73,7 @@ export function QueueHealthPanel({
   const completionStatus = completionRate > 70 ? 'healthy' : completionRate > 40 ? 'busy' : 'delayed';
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="rounded-xl border-[1.5px] border-border/30 bg-card p-4 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
         <Activity className="h-4 w-4 text-muted-foreground" />
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import type { QueueEntryDTO } from '@/types';
 
 async function fetchEntries(queueId: string): Promise<QueueEntryDTO[]> {
@@ -15,5 +15,6 @@ export function useQueueEntries(queueId: string | null) {
     queryKey: ['queue-entries', queueId],
     queryFn: () => fetchEntries(queueId!),
     enabled: !!queueId,
+    placeholderData: keepPreviousData,
   });
 }

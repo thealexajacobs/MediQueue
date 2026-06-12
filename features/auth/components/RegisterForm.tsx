@@ -43,6 +43,7 @@ export function RegisterForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clinicName: data.clinicName,
+          name: data.name,
           email: data.email,
           password: data.password,
         }),
@@ -79,6 +80,22 @@ export function RegisterForm() {
         />
         {errors.clinicName && (
           <p className="mt-1 text-sm text-destructive">{errors.clinicName.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="name" className="mb-1 block text-sm text-muted-foreground">
+          Your Name
+        </label>
+        <input
+          id="name"
+          type="text"
+          autoComplete="name"
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${completed.name ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          {...register('name', { onBlur: markCompleted('name') })}
+        />
+        {errors.name && (
+          <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
         )}
       </div>
 

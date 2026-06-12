@@ -13,11 +13,15 @@ interface ActionBarProps {
 }
 
 const actions = [
-  { label: 'Add Patient', icon: UserPlus, key: 'add' as const, primary: true },
-  { label: 'Call Next', icon: ArrowRight, key: 'next' as const, primary: false },
+  { label: 'Add Patient', icon: UserPlus, key: 'add' as const, primary: false },
+  { label: 'Call Next', icon: ArrowRight, key: 'next' as const, primary: true },
   { label: 'Skip', icon: SkipForward, key: 'skip' as const, primary: false },
   { label: 'Complete', icon: CheckCircle2, key: 'complete' as const, primary: false },
 ];
+
+const primaryBtnClass = 'group relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-primary py-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_2px_10px_rgba(14,165,233,0.15)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_6px_20px_rgba(14,165,233,0.3)] hover:brightness-105 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:-translate-y-0 disabled:hover:shadow-none';
+
+const secondaryBtnClass = 'group relative flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:bg-white/10 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_6px_12px_rgba(0,0,0,0.1)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:-translate-y-0';
 
 export function ActionBar({
   onAddPatient,
@@ -43,21 +47,21 @@ export function ActionBar({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <div className="grid grid-cols-4 gap-4">
+    <div className="relative overflow-hidden rounded-3xl border-[1.5px] border-border/40 bg-gradient-to-b from-card/60 to-background/80 p-6 backdrop-blur-xl shadow-lg shadow-black/5">
+      <div className="pointer-events-none absolute left-1/4 top-1/2 h-32 w-32 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
+
+      <div className="relative grid grid-cols-4 gap-5">
         {actions.map(({ label, icon: Icon, key, primary }) => (
           <button
             key={key}
             onClick={handlers[key]}
             disabled={disabled[key]}
-            className={
-              primary
-                ? 'flex flex-col items-center justify-center gap-2.5 rounded-xl bg-primary py-5 transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40'
-                : 'flex flex-col items-center justify-center gap-2.5 rounded-xl border border-border bg-background py-5 transition-all hover:bg-muted active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40'
-            }
+            className={primary ? primaryBtnClass : secondaryBtnClass}
           >
-            <Icon className={`h-6 w-6 ${primary ? 'text-primary-foreground' : 'text-foreground'}`} />
-            <span className={`text-center text-xs font-semibold ${primary ? 'text-primary-foreground' : 'text-foreground'}`}>
+            <div className={`transition-transform duration-300 group-hover:scale-110 ${primary ? 'text-primary-foreground' : 'text-foreground/80 group-hover:text-foreground'}`}>
+              <Icon className="h-7 w-7" />
+            </div>
+            <span className={`text-center text-sm font-bold tracking-wide transition-colors duration-300 ${primary ? 'text-primary-foreground' : 'text-foreground/80 group-hover:text-foreground'}`}>
               {label}
             </span>
           </button>

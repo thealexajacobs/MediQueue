@@ -22,6 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email },
           select: {
             id: true,
+            name: true,
             email: true,
             passwordHash: true,
             role: true,
@@ -36,8 +37,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         return {
           id: user.id,
+          name: user.name || user.email.split('@')[0],
           email: user.email,
-          name: user.email,
           role: user.role as Role,
           clinicId: user.clinicId,
         };
@@ -48,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
         token.clinicId = (user as { clinicId: string }).clinicId;
         token.role = (user as { role: Role }).role;
       }
@@ -56,6 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.name = token.name as string;
         session.user.clinicId = token.clinicId as string;
         session.user.role = token.role as Role;
       }

@@ -11,42 +11,50 @@ export default async function DashboardPage() {
     redirect('/auth?mode=login');
   }
 
-  const clinic = await prisma.clinic.findUnique({
-    where: { id: session.user.clinicId },
-    select: { name: true },
-  });
+  const [clinic, queues] = await Promise.all([
+    prisma.clinic.findUnique({
+      where: { id: session.user.clinicId },
+      select: { name: true },
+    }),
+    prisma.queue.findMany({
+      where: { clinicId: session.user.clinicId },
+      orderBy: { createdAt: 'asc' },
+    }),
+  ]);
 
-  const queueCount = await prisma.queue.count({
-    where: { clinicId: session.user.clinicId },
-  });
-
-  if (queueCount === 0) {
+  if (queues.length === 0) {
     redirect('/onboarding');
   }
 
-  const queues = await prisma.queue.findMany({
-    where: { clinicId: session.user.clinicId },
-    orderBy: { createdAt: 'asc' },
+  const waitingEntries = await prisma.queueEntry.findMany({
+    where: {
+      queueId: { in: queues.map((q) => q.id) },
+      status: 'WAITING',
+    },
+    select: { queueId: true },
   });
 
-  const queuesWithCounts: QueueDTO[] = await Promise.all(
-    queues.map(async (queue) => ({
-      id: queue.id,
-      clinicId: queue.clinicId,
-      name: queue.name,
-      status: queue.status as QueueDTO['status'],
-      createdAt: queue.createdAt,
-      updatedAt: queue.updatedAt,
-      waitingCount: await prisma.queueEntry.count({
-        where: { queueId: queue.id, status: 'WAITING' },
-      }),
-    })),
-  );
+  const countMap = new Map<string, number>();
+  for (const e of waitingEntries) {
+    countMap.set(e.queueId, (countMap.get(e.queueId) ?? 0) + 1);
+  }
+
+  const queuesWithCounts: QueueDTO[] = queues.map((queue) => ({
+    id: queue.id,
+    clinicId: queue.clinicId,
+    name: queue.name,
+    status: queue.status as QueueDTO['status'],
+    createdAt: queue.createdAt,
+    updatedAt: queue.updatedAt,
+    waitingCount: countMap.get(queue.id) ?? 0,
+  }));
 
   return (
     <DashboardShell
       clinicName={clinic?.name ?? 'Clinic'}
       clinicId={session.user.clinicId}
+      userName={session.user.name}
+      userEmail={session.user.email}
       initialQueues={queuesWithCounts}
     />
   );

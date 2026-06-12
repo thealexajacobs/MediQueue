@@ -32,13 +32,21 @@ export function QueueMetricsRow({
         return (
           <div
             key={m.label}
-            className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm"
+            className="relative overflow-hidden rounded-2xl border border-border/20 bg-card/40 p-5 shadow-sm backdrop-blur-md"
           >
-            <Icon className="h-4 w-4 text-muted-foreground" />
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {displayValue}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground">{m.label}</p>
+            <div className="relative z-10 flex flex-col gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold tracking-tight text-foreground">
+                  {displayValue}
+                </p>
+                <p className="mt-1 text-xs font-medium tracking-wider text-muted-foreground">
+                  {m.label}
+                </p>
+              </div>
+            </div>
           </div>
         );
       })}

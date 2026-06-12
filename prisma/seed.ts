@@ -15,6 +15,7 @@ async function main() {
     update: {},
     create: {
       clinicId: clinic.id,
+      name: 'Admin User',
       email: 'admin@demo.com',
       passwordHash: await bcrypt.hash('Demo1234!', 12),
       role: 'CLINIC_ADMIN',
@@ -26,6 +27,7 @@ async function main() {
     update: {},
     create: {
       clinicId: clinic.id,
+      name: 'Reception User',
       email: 'reception@demo.com',
       passwordHash: await bcrypt.hash('Demo1234!', 12),
       role: 'RECEPTIONIST',

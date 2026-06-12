@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueues, useCreateQueue } from '@/features/queues/hooks/useQueueMutations';
 import { useQueueStore } from '@/features/queues/hooks/useQueueStore';
@@ -14,7 +14,10 @@ import { QueueMetricsRow } from '@/components/dashboard/QueueMetricsRow';
 import { ActionBar } from '@/components/dashboard/ActionBar';
 import { QueueProgress } from '@/components/dashboard/QueueProgress';
 import { LiveActivity } from '@/components/dashboard/LiveActivity';
-import { AddPatientDrawer } from '@/components/dashboard/AddPatientDrawer';
+import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
+import { QueueHealthPanel } from '@/components/dashboard/QueueHealthPanel';
+import { AddPatientModal } from '@/components/dashboard/AddPatientModal';
+import { SettingsModal } from '@/components/dashboard/SettingsModal';
 import { Dialog } from '@/components/ui/Dialog';
 import { Spinner } from '@/components/ui/Spinner';
 import { Plus, Loader2 } from 'lucide-react';
@@ -23,17 +26,21 @@ import type { QueueDTO } from '@/types';
 interface DashboardShellProps {
   clinicName?: string;
   clinicId?: string;
+  userName?: string;
+  userEmail?: string;
   initialQueues?: QueueDTO[];
 }
 
-export function DashboardShell({ clinicName: propClinicName, clinicId, initialQueues }: DashboardShellProps) {
+export function DashboardShell({ clinicName: propClinicName, clinicId, userName, userEmail, initialQueues }: DashboardShellProps) {
   const { data: queues, isLoading: queuesLoading } = useQueues(initialQueues);
   const selectedQueueId = useQueueStore((s) => s.selectedQueueId);
   const setSelectedQueueId = useQueueStore((s) => s.setSelectedQueueId);
   const { data: entries, isLoading: entriesLoading } = useQueueEntries(selectedQueueId);
   const { callNext, skip, complete } = useEntryMutations(selectedQueueId);
-  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
+  const stableEntriesRef = useRef(entries);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
   const { mutateAsync: createQueue, isPending: isCreatingQueue } = useCreateQueue();
   const queryClient = useQueryClient();
@@ -54,15 +61,23 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
     queryClient.invalidateQueries({ queryKey: ['queue-entries', selectedQueueId] });
   }, [selectedQueueId, queryClient]);
 
+  useEffect(() => {
+    if (entries && !entriesLoading) {
+      stableEntriesRef.current = entries;
+    }
+  }, [entries, entriesLoading]);
+
+  const displayEntries = entriesLoading && !entries ? (stableEntriesRef.current ?? []) : (entries ?? []);
+
   const waitingEntries = useMemo(
     () =>
-      (entries ?? [])
+      displayEntries
         .filter((e) => e.status === 'WAITING')
         .sort((a, b) => a.position - b.position),
-    [entries],
+    [displayEntries],
   );
 
-  const handleAddPatient = useCallback(() => setIsAddDrawerOpen(true), []);
+  const handleAddPatient = useCallback(() => setIsAddModalOpen(true), []);
   const handleCompleteAndCallNext = useCallback(async () => {
     const next = waitingEntries.length > 0 ? waitingEntries[0] : null;
     if (next) {
@@ -125,17 +140,33 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
   if (!queues?.length) return null;
 
   const currentQueue = queues.find((q) => q.id === selectedQueueId);
-  const servingEntry = entries?.find((e) => e.status === 'SERVING') ?? null;
+  const servingEntry = displayEntries.find((e) => e.status === 'SERVING') ?? null;
   const nextEntry = waitingEntries.length > 0 ? waitingEntries[0] : null;
-  const servingCount = entries?.filter((e) => e.status === 'SERVING').length ?? 0;
-  const completedToday = entries?.filter((e) => e.status === 'COMPLETED').length ?? 0;
-  const avgWaitTime = 12;
+  const servingCount = displayEntries.filter((e) => e.status === 'SERVING').length;
+  const completedToday = displayEntries.filter((e) => e.status === 'COMPLETED').length;
+  const completedEntries = displayEntries.filter((e) => e.status === 'COMPLETED');
+  const avgWaitTime = useMemo(() => {
+    if (completedEntries.length === 0) return 0;
+    const totalMs = completedEntries.reduce((sum, e) => sum + (new Date(e.updatedAt).getTime() - new Date(e.createdAt).getTime()), 0);
+    return Math.round(totalMs / completedEntries.length / 60000);
+  }, [completedEntries]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <TopBar clinicName={propClinicName ?? 'Clinic'} />
+    <div className="flex min-h-screen flex-col bg-background relative overflow-hidden">
+      {/* Modern Background Effects */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute left-[20%] top-[-10%] h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]"></div>
+        <div className="absolute right-[10%] top-[40%] h-[400px] w-[400px] rounded-full bg-emerald-500/5 blur-[120px]"></div>
+      </div>
 
-      <div className="flex items-center border-b border-border/40 px-6 py-4">
+      <div className="relative z-10 flex flex-col h-screen">
+        <TopBar
+          clinicName={propClinicName ?? 'Clinic'}
+          onSettingsClick={() => setIsSettingsOpen(true)}
+        />
+
+      <div className="flex items-center border-b border-border/10 px-6">
         <QueueTabs
           queues={queues}
           selectedQueueId={selectedQueueId}
@@ -143,7 +174,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
         />
         <button
           onClick={() => setIsAddDepartmentOpen(true)}
-          className="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+          className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
           aria-label="Add department"
         >
           <Plus className="h-4 w-4" />
@@ -153,7 +184,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row">
           <div className="min-w-0 flex-1 space-y-6">
-            {entriesLoading ? (
+            {entriesLoading && !stableEntriesRef.current ? (
               <div className="flex items-center justify-center py-24">
                 <Spinner label="Loading patients..." />
               </div>
@@ -187,20 +218,32 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
           </div>
 
           <div className="w-full shrink-0 space-y-6 lg:w-[340px]">
-            <QueueProgress entries={entries ?? []} />
-            <LiveActivity entries={entries ?? []} />
+            <AlertsPanel waitingCount={waitingEntries.length} avgWaitTime={avgWaitTime} />
+            <QueueHealthPanel waitingCount={waitingEntries.length} avgWaitTime={avgWaitTime} servedToday={completedToday} />
+            <QueueProgress entries={displayEntries} />
+            <LiveActivity entries={displayEntries} />
           </div>
         </div>
       </div>
 
       {selectedQueueId && (
-        <AddPatientDrawer
-          open={isAddDrawerOpen}
-          onClose={() => setIsAddDrawerOpen(false)}
+        <AddPatientModal
+          open={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
           queueId={selectedQueueId}
           queueName={currentQueue?.name ?? ''}
+          queues={queues}
         />
       )}
+
+      <SettingsModal
+        open={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        clinicName={propClinicName ?? 'Clinic'}
+        clinicId={clinicId}
+        userName={userName ?? ''}
+        userEmail={userEmail ?? ''}
+      />
 
       <Dialog
         open={isAddDepartmentOpen}
@@ -229,7 +272,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
             <button
               type="button"
               onClick={() => { setIsAddDepartmentOpen(false); setNewDepartmentName(''); }}
-              className="inline-flex h-10 items-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              className="inline-flex h-10 items-center rounded-lg border-[1.5px] border-border/30 bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
             >
               Cancel
             </button>
@@ -244,6 +287,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, initialQu
           </div>
         </form>
       </Dialog>
+      </div>
     </div>
   );
 }

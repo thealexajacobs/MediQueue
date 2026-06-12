@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Building2, Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, ChevronRight, Users, Layers, Circle, CircleCheck } from 'lucide-react';
+import { Loader2, Building2, Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, ChevronRight, Users, Layers, Circle, CircleCheck, Eye, EyeOff } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 
 const step1Schema = z.object({
@@ -21,7 +21,7 @@ const STEP_LABELS = ['Workspace', 'Queue', 'Complete'];
 const STEP_CONFIG = [
   {
     heading: 'Create your healthcare workspace',
-    supporting: 'Set up your clinic or hospital in minutes.',
+    supporting: 'Set up your workspace in minutes.',
   },
   {
     heading: 'How would you like to manage your queues?',
@@ -42,6 +42,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
   const router = useRouter();
   const [step, setStep] = useState(initialStep);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [showDepartmentSelection, setShowDepartmentSelection] = useState(false);
@@ -57,7 +58,6 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
   });
 
   const totalSteps = 3;
-  const progressPercent = Math.round(((step - 1) / (totalSteps - 1)) * 100);
   const cfg = STEP_CONFIG[step - 1] ?? STEP_CONFIG[0];
 
   async function handleStep1(data: Step1Data) {
@@ -70,6 +70,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clinicName: data.facilityName,
+          name: data.email.split('@')[0],
           email: data.email,
           password: data.password,
         }),
@@ -141,7 +142,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
           <span className="text-xs font-medium text-muted-foreground">
             Step {step} of {totalSteps}
           </span>
-          <span className="text-xs font-semibold text-foreground">{progressPercent}%</span>
+
         </div>
 
         <div className="flex gap-1">
@@ -203,7 +204,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   autoFocus
                   autoComplete="organization"
                   className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                  placeholder="e.g. Healing Hands Clinic"
+
                   {...step1Form.register('facilityName')}
                 />
               </div>
@@ -225,7 +226,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   type="email"
                   autoComplete="email"
                   className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                  placeholder="you@clinic.com"
+
                   {...step1Form.register('email')}
                 />
               </div>
@@ -242,12 +243,20 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                  placeholder="At least 8 characters"
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+
                   {...step1Form.register('password')}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               {step1Form.formState.errors.password && (
                 <p className="mt-1 text-xs text-destructive">{step1Form.formState.errors.password.message}</p>
@@ -408,7 +417,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   }
                 }}
                 className="h-10 flex-1 rounded-lg border border-input bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                placeholder="Add custom department..."
+
               />
               <button
                 type="button"

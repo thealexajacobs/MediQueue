@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 const registerSchema = z.object({
   clinicName: z.string().min(1, 'Clinic name is required').max(100).trim(),
+  name: z.string().max(100).trim().default(''),
   email: z.string().email('Invalid email address').trim(),
   password: z.string()
     .min(8, 'At least 8 characters')
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { clinicName, email, password } = parsed.data;
+    const { clinicName, name, email, password } = parsed.data;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
     await prisma.user.create({
       data: {
         clinicId: clinic.id,
+        name,
         email,
         passwordHash,
         role: 'CLINIC_ADMIN',

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const registerSchema = z.object({
   clinicName: z.string().min(1, 'This field cannot be empty').max(100).trim(),
+  name: z.string().min(1, 'This field cannot be empty').max(100).trim(),
   email: z.string().email('Enter a valid email address').trim(),
   password: z.string()
     .min(8, 'At least 8 characters')

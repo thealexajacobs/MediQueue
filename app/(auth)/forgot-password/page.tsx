@@ -1,6 +1,57 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.message || 'Failed to send reset link');
+        setIsLoading(false);
+        return;
+      }
+      setSent(true);
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-8">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+          <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            If an account exists with that email, we&apos;ve sent a password reset link.
+          </p>
+          <Link href="/auth?mode=login" className="text-sm font-medium text-primary underline underline-offset-2">Back to login</Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="mb-8 text-center">
@@ -10,7 +61,11 @@ export default function ForgotPasswordPage() {
         </p>
       </div>
 
-      <form className="flex w-full max-w-sm flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
+        {error && (
+          <div className="rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>
+        )}
+
         <div>
           <label htmlFor="email" className="mb-1 block text-sm text-muted-foreground">
             Email
@@ -18,6 +73,8 @@ export default function ForgotPasswordPage() {
           <input
             id="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
             className="h-11 w-full rounded-sm border border-border bg-card px-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
             placeholder="you@clinic.com"
@@ -26,9 +83,10 @@ export default function ForgotPasswordPage() {
 
         <button
           type="submit"
-          className="flex h-11 items-center justify-center rounded-sm bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90"
+          disabled={isLoading || !email.trim()}
+          className="flex h-11 items-center justify-center gap-2 rounded-sm bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Send reset link
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send reset link'}
         </button>
       </form>
 

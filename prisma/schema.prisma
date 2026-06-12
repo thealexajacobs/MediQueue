@@ -47,6 +47,7 @@ model Clinic {
 model User {
   id           String   @id @default(uuid())
   clinicId     String
+  name         String   @default("")
   email        String   @unique
   passwordHash String
   role         Role     @default(RECEPTIONIST)
@@ -72,6 +73,7 @@ model Queue {
   events   QueueEvent[]
   analytics AnalyticsRecord[]
 
+  @@unique([clinicId, name])
   @@index([clinicId])
   @@index([clinicId, status])
 }
@@ -84,6 +86,7 @@ model QueueEntry {
   queueNumber Int
   status      EntryStatus @default(WAITING)
   position    Int
+  deletedAt   DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -95,6 +98,7 @@ model QueueEntry {
   @@index([status])
   @@index([queueId, status])
   @@index([position])
+  @@index([deletedAt])
 }
 
 model QueueEvent {
@@ -103,6 +107,7 @@ model QueueEvent {
   entryId   String?
   eventType QueueEventType
   timestamp DateTime       @default(now())
+  deletedAt DateTime?
 
   entry QueueEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
   queue Queue     @relation(fields: [queueId], references: [id], onDelete: Cascade)
@@ -110,14 +115,16 @@ model QueueEvent {
   @@index([queueId])
   @@index([entryId])
   @@index([timestamp])
+  @@index([deletedAt])
 }
 
 model AnalyticsRecord {
-  id       String   @id @default(uuid())
-  clinicId String
-  queueId  String
-  date     DateTime
-  metrics  Json
+  id        String   @id @default(uuid())
+  clinicId  String
+  queueId   String
+  date      DateTime
+  metrics   Json
+  deletedAt DateTime?
 
   clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   queue  Queue  @relation(fields: [queueId], references: [id], onDelete: Cascade)
@@ -125,4 +132,5 @@ model AnalyticsRecord {
   @@index([clinicId])
   @@index([queueId])
   @@index([date])
+  @@index([deletedAt])
 }

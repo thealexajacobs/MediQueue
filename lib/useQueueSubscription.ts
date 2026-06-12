@@ -23,6 +23,7 @@ export function useQueueSubscription({
     if (socketRef.current?.connected) return;
 
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    if (!socketUrl) return;
     const socket = io(socketUrl, {
       query: { clinicId, queueId },
       transports: ['websocket', 'polling'],
