@@ -91,7 +91,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
       });
 
       if (signInResult?.error) {
-        router.push('/auth?mode=login');
+        router.push('/login');
         return;
       }
 
@@ -183,7 +183,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
         </p>
       </div>
 
-      <div className="rounded-xl bg-background p-6">
+      <div className="rounded-xl bg-background p-4 sm:p-6">
         {error && (
           <div className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error}
@@ -249,14 +249,16 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
 
                   {...step1Form.register('password')}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                {step1Form.watch('password') && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </button>
+                )}
               </div>
               {step1Form.formState.errors.password && (
                 <p className="mt-1 text-xs text-destructive">{step1Form.formState.errors.password.message}</p>
@@ -278,6 +280,15 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
               )}
             </button>
           </form>
+        )}
+
+        {step === 1 && (
+          <p className="text-center text-xs text-muted-foreground mt-3">
+            Already have an account?{' '}
+            <a href="/login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+              Sign in
+            </a>
+          </p>
         )}
 
         {step === 2 && !showDepartmentSelection && (
@@ -392,15 +403,6 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
 
         {step === 2 && showDepartmentSelection && (
           <div className="space-y-5">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">
-                Select departments
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Choose the departments you want to create queues for.
-              </p>
-            </div>
-
             <div className="flex gap-2">
               <input
                 type="text"
@@ -502,17 +504,6 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
           </div>
         )}
       </div>
-
-
-
-      {step === 1 && (
-        <p className="text-center text-xs text-muted-foreground">
-          Already have an account?{' '}
-          <a href="/auth?mode=login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-            Sign in
-          </a>
-        </p>
-      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Clock } from 'lucide-react';
 import type { QueueEntryDTO } from '@/types';
 
@@ -23,7 +24,7 @@ function timeSince(date: Date): string {
   return `${hrs}h ${mins % 60}m`;
 }
 
-export function CurrentPatientHero({
+export const CurrentPatientHero = memo(function CurrentPatientHero({
   servingEntry,
   queueName,
   waitingCount,
@@ -31,7 +32,7 @@ export function CurrentPatientHero({
 }: CurrentPatientHeroProps) {
   if (!servingEntry) {
     return (
-      <div className="flex h-80 flex-col items-center justify-center rounded-xl border-[1.5px] border-border/30 bg-card p-6 shadow-sm">
+      <div className="flex h-48 flex-col items-center justify-center rounded-xl border-[1.5px] border-border/30 bg-card p-4 shadow-sm sm:h-80 sm:p-6">
         <div className="flex flex-col items-center gap-5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
             <Clock className="h-8 w-8 text-muted-foreground" />
@@ -54,7 +55,7 @@ export function CurrentPatientHero({
 
   return (
     <div
-      className="relative flex h-80 flex-col overflow-hidden rounded-2xl p-8 shadow-xl"
+      className="relative flex flex-col overflow-hidden rounded-2xl p-4 shadow-xl sm:p-8"
       style={{
         background: 'linear-gradient(135deg, hsl(0,0%,11%) 0%, hsl(200, 30%, 15%) 100%)',
       }}
@@ -69,8 +70,8 @@ export function CurrentPatientHero({
       <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/20 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/10 blur-[100px]" />
 
-      <div className="relative flex flex-1 items-center justify-between z-10">
-        <div className="space-y-6">
+      <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-3 sm:space-y-6">
           <div className="flex items-center gap-3">
             <span className="relative flex h-3 w-3">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -82,10 +83,10 @@ export function CurrentPatientHero({
           </div>
 
           <div className="flex flex-col gap-1">
-            <p className="font-mono text-[5.5rem] leading-none font-black tracking-tighter text-white drop-shadow-lg">
+            <p className="font-mono text-[clamp(2.5rem,_5vw_+_1rem,_5.5rem)] leading-none font-black tracking-tighter text-white drop-shadow-lg">
               {pad(servingEntry.queueNumber)}
             </p>
-            <p className="text-2xl font-bold tracking-tight text-white/90 truncate max-w-md">
+            <p className="text-lg font-bold tracking-tight text-white/90 truncate max-w-[200px] sm:max-w-md sm:text-2xl">
               {servingEntry.patientName}
             </p>
           </div>
@@ -101,22 +102,22 @@ export function CurrentPatientHero({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-6">
-          <p className="rounded-full bg-white/5 px-4 py-1.5 text-sm font-semibold text-white/80 border border-white/10 backdrop-blur-md shadow-sm">
+        <div className="flex flex-row items-center gap-3 sm:flex-col sm:items-end sm:gap-6">
+          <p className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-white/80 border border-white/10 backdrop-blur-md shadow-sm sm:px-4 sm:py-1.5 sm:text-sm">
             {queueName}
           </p>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-6 rounded-xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-md shadow-sm min-w-[140px] transition-transform hover:scale-105">
-              <p className="text-sm font-medium text-white/60">Waiting</p>
-              <p className="text-2xl font-bold text-white">{waitingCount}</p>
+          <div className="flex flex-row gap-3 sm:flex-col">
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md shadow-sm sm:min-w-[140px] sm:px-5 sm:py-4 sm:gap-6 transition-transform hover:scale-105">
+              <p className="text-xs font-medium text-white/60 sm:text-sm">Waiting</p>
+              <p className="text-lg font-bold text-white sm:text-2xl">{waitingCount}</p>
             </div>
-            <div className="flex items-center justify-between gap-6 rounded-xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-md shadow-sm min-w-[140px] transition-transform hover:scale-105">
-              <p className="text-sm font-medium text-white/60">Total</p>
-              <p className="text-2xl font-bold text-white">{totalEntries}</p>
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md shadow-sm sm:min-w-[140px] sm:px-5 sm:py-4 sm:gap-6 transition-transform hover:scale-105">
+              <p className="text-xs font-medium text-white/60 sm:text-sm">Total</p>
+              <p className="text-lg font-bold text-white sm:text-2xl">{totalEntries}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+});

@@ -11,7 +11,7 @@ const forgotSchema = z.object({
 function createResetToken(email: string): string {
   const timestamp = Date.now() + 3600000;
   const payload = `${email}:${timestamp}`;
-  const hmac = createHmac('sha256', process.env.AUTH_SECRET!).update(payload).digest('hex');
+  const hmac = createHmac('sha256', process.env.JWT_SECRET!).update(payload).digest('hex');
   return Buffer.from(`${payload}:${hmac}`).toString('base64url');
 }
 
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     });
 
     const token = createResetToken(email);
-    const resetUrl = `${process.env.AUTH_URL || 'http://localhost:3000'}/auth/reset-password?token=${token}`;
+    const resetUrl = `${process.env.AUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 
     if (user) {
       await sendEmail({

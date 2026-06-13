@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-import { requireRole } from '@/lib/auth';
-import { Role } from '@/types';
-import { UnauthorizedError, ForbiddenError } from '@/lib/errors';
+import { UnauthorizedError } from '@/lib/errors';
 
 const updateClinicSchema = z.object({
   name: z.string().min(1, 'Clinic name is required').max(100).trim(),
@@ -13,8 +11,6 @@ const updateClinicSchema = z.object({
 export const PATCH = auth(async (req) => {
   try {
     if (!req.auth?.user) throw new UnauthorizedError();
-
-    requireRole(req.auth.user, Role.CLINIC_ADMIN);
 
     const body = await req.json();
     const parsed = updateClinicSchema.safeParse(body);
@@ -33,9 +29,6 @@ export const PATCH = auth(async (req) => {
   } catch (err) {
     if (err instanceof UnauthorizedError) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-    }
-    if (err instanceof ForbiddenError) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
     console.error('[clinics] PATCH error:', err);
     return NextResponse.json({ success: false, message: 'Something went wrong' }, { status: 500 });

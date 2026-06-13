@@ -1,26 +1,6 @@
-'use client';
-
-import { useSearchParams } from 'next/navigation';
-import { LoginForm } from '@/features/auth/components/LoginForm';
-import { RegisterForm } from '@/features/auth/components/RegisterForm';
 import Link from 'next/link';
 
-const MODE_CONFIG = {
-  login: {
-    heading: 'Welcome back',
-    supporting: 'Sign in to manage your queues.',
-  },
-  register: {
-    heading: 'Create your account',
-    supporting: 'Set up your clinic in minutes.',
-  },
-} as const;
-
-export default function AuthPage() {
-  const searchParams = useSearchParams();
-  const mode = searchParams.get('mode') ?? 'login';
-  const cfg = MODE_CONFIG[mode as keyof typeof MODE_CONFIG] ?? MODE_CONFIG.login;
-
+export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <div className="hidden lg:flex lg:w-1/2 flex-col bg-gradient-to-br from-[#0a0f1e] via-[#141b3d] to-[#0a0f1e] p-10 relative overflow-hidden">
@@ -71,37 +51,8 @@ export default function AuthPage() {
       </div>
 
       <div className="flex w-full lg:w-1/2 items-center justify-center bg-background">
-        <div className="w-full max-w-md pl-4 pr-10 py-6">
-          <div className="w-full max-w-md space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold leading-tight tracking-tight text-foreground">
-                {cfg.heading}
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">{cfg.supporting}</p>
-            </div>
-
-            <div className="rounded-xl bg-background p-6">
-              {mode === 'login' && <LoginForm />}
-              {mode === 'register' && <RegisterForm />}
-            </div>
-
-            {mode === 'login' && (
-              <p className="text-center text-xs text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Link href="/onboarding?fresh=1" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-                  Create an account
-                </Link>
-              </p>
-            )}
-            {mode === 'register' && (
-              <p className="text-center text-xs text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/auth?mode=login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-                  Sign in
-                </Link>
-              </p>
-            )}
-          </div>
+        <div className="w-full max-w-xl px-[16px] py-8 lg:px-10">
+          {children}
         </div>
       </div>
     </div>

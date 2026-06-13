@@ -10,14 +10,14 @@ interface QueueTabsProps {
 
 export function QueueTabs({ queues, selectedQueueId, onSelectQueue }: QueueTabsProps) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto">
+    <div className="flex items-center gap-1 overflow-x-auto min-w-0">
       {queues.map((queue) => {
         const isActive = queue.id === selectedQueueId;
         return (
           <button
             key={queue.id}
             onClick={() => onSelectQueue(queue.id)}
-            className={`relative shrink-0 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`relative shrink-0 whitespace-nowrap px-3 py-2.5 text-xs font-medium transition-colors sm:px-4 sm:py-3 sm:text-sm ${
               isActive
                 ? 'text-foreground'
                 : 'text-muted-foreground hover:text-foreground'

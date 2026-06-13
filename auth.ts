@@ -2,9 +2,9 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import type { Role } from '@/types';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.JWT_SECRET,
   providers: [
     Credentials({
       name: 'credentials',
@@ -25,7 +25,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: true,
             email: true,
             passwordHash: true,
-            role: true,
             clinicId: true,
           },
         });
@@ -39,7 +38,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           name: user.name || user.email.split('@')[0],
           email: user.email,
-          role: user.role as Role,
           clinicId: user.clinicId,
         };
       },
@@ -51,7 +49,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.name = user.name;
         token.clinicId = (user as { clinicId: string }).clinicId;
-        token.role = (user as { role: Role }).role;
       }
       return token;
     },
@@ -60,7 +57,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.clinicId = token.clinicId as string;
-        session.user.role = token.role as Role;
       }
       return session;
     },
@@ -69,6 +65,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: 'jwt',
   },
   pages: {
-    signIn: '/auth?mode=login',
+    signIn: '/login',
   },
 });

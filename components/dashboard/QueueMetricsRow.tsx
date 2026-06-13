@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Users, PhoneCall, CheckCircle2, Clock } from 'lucide-react';
 
 interface QueueMetricsRowProps {
@@ -16,7 +17,7 @@ const metricConfig = [
   { label: 'Avg Wait Time', icon: Clock },
 ];
 
-export function QueueMetricsRow({
+export const QueueMetricsRow = memo(function QueueMetricsRow({
   waitingCount,
   servingCount,
   completedToday,
@@ -25,24 +26,24 @@ export function QueueMetricsRow({
   const values = [waitingCount, servingCount, completedToday, avgWaitTime];
 
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
       {metricConfig.map((m, i) => {
         const Icon = m.icon;
         const displayValue = i === 3 ? `${values[i]}m` : String(values[i]);
         return (
           <div
             key={m.label}
-            className="relative overflow-hidden rounded-2xl border border-border/20 bg-card/40 p-5 shadow-sm backdrop-blur-md"
+            className="relative overflow-hidden rounded-xl border border-border/20 bg-card/40 p-3 shadow-sm backdrop-blur-md sm:rounded-2xl sm:p-5"
           >
-            <div className="relative z-10 flex flex-col gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Icon className="h-5 w-5" />
+            <div className="relative z-10 flex flex-row items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-10 sm:w-10 sm:rounded-xl">
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <p className="text-3xl font-bold tracking-tight text-foreground">
+                <p className="text-xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {displayValue}
                 </p>
-                <p className="mt-1 text-xs font-medium tracking-wider text-muted-foreground">
+                <p className="text-[10px] font-medium tracking-wider text-muted-foreground sm:mt-1 sm:text-xs">
                   {m.label}
                 </p>
               </div>
@@ -52,4 +53,4 @@ export function QueueMetricsRow({
       })}
     </div>
   );
-}
+});

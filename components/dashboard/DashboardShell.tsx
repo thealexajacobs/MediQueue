@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useQueues, useCreateQueue } from '@/features/queues/hooks/useQueueMutations';
 import { useQueueStore } from '@/features/queues/hooks/useQueueStore';
 import { useQueueEntries } from '@/features/queue-entries/hooks/useQueueEntries';
@@ -43,7 +42,6 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
   const { mutateAsync: createQueue, isPending: isCreatingQueue } = useCreateQueue();
-  const queryClient = useQueryClient();
 
   useQueueSubscription({
     clinicId: clinicId ?? '',
@@ -56,10 +54,6 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
       setSelectedQueueId(queues[0].id);
     }
   }, [queues, selectedQueueId, setSelectedQueueId]);
-
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['queue-entries', selectedQueueId] });
-  }, [selectedQueueId, queryClient]);
 
   useEffect(() => {
     if (entries && !entriesLoading) {
@@ -166,7 +160,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
           onSettingsClick={() => setIsSettingsOpen(true)}
         />
 
-      <div className="flex items-center border-b border-border/10 px-6">
+      <div className="flex items-center border-b border-border/10 px-4 sm:px-6 min-w-0">
         <QueueTabs
           queues={queues}
           selectedQueueId={selectedQueueId}
@@ -182,8 +176,8 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row">
-          <div className="min-w-0 flex-1 space-y-6">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:flex-row">
+          <div className="min-w-0 flex-1 space-y-4 sm:space-y-6">
             {entriesLoading && !stableEntriesRef.current ? (
               <div className="flex items-center justify-center py-24">
                 <Spinner label="Loading patients..." />
@@ -219,7 +213,6 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
 
           <div className="w-full shrink-0 space-y-6 lg:w-[340px]">
             <AlertsPanel waitingCount={waitingEntries.length} avgWaitTime={avgWaitTime} />
-            <QueueHealthPanel waitingCount={waitingEntries.length} avgWaitTime={avgWaitTime} servedToday={completedToday} />
             <QueueProgress entries={displayEntries} />
             <LiveActivity entries={displayEntries} />
           </div>

@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { updateQueueSchema } from '@/features/queues/schemas/queue';
-import { requireRole } from '@/lib/auth';
-import { Role, QueueEventType } from '@/types';
+import { z } from 'zod';
+import { QueueEventType } from '@/types';
 import { emitQueueEvent } from '@/lib/websocket';
-import { UnauthorizedError, ForbiddenError, NotFoundError } from '@/lib/errors';
+import { UnauthorizedError, NotFoundError } from '@/lib/errors';
+
+const restoreSchema = z.object({
+  restore: z.literal(true),
+});
 
 export const PATCH = auth(async (
   req,
@@ -13,7 +17,6 @@ export const PATCH = auth(async (
 ) => {
   try {
     if (!req.auth?.user) throw new UnauthorizedError();
-    requireRole(req.auth.user, Role.CLINIC_ADMIN);
 
     const { id } = await params;
 
@@ -23,15 +26,33 @@ export const PATCH = auth(async (
     if (!existing) throw new NotFoundError('Queue not found');
 
     const body = await req.json();
-    const parsed = updateQueueSchema.safeParse(body);
 
+    // Handle restore action
+    const restoreParsed = restoreSchema.safeParse(body);
+    if (restoreParsed.success) {
+      const queue = await prisma.queue.update({
+        where: { id, clinicId: req.auth.user.clinicId },
+        data: { deletedAt: null },
+      });
+
+      emitQueueEvent({
+        type: QueueEventType.QUEUE_UPDATED,
+        clinicId: req.auth.user.clinicId,
+        queueId: id,
+      });
+
+      return NextResponse.json({ success: true, data: queue });
+    }
+
+    // Handle regular update
+    const parsed = updateQueueSchema.safeParse(body);
     if (!parsed.success) {
       const msg = parsed.error.issues[0]?.message || 'Validation failed';
       return NextResponse.json({ success: false, message: msg }, { status: 400 });
     }
 
     const queue = await prisma.queue.update({
-      where: { id },
+      where: { id, clinicId: req.auth.user.clinicId },
       data: parsed.data,
     });
 
@@ -45,9 +66,6 @@ export const PATCH = auth(async (
   } catch (err) {
     if (err instanceof UnauthorizedError) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-    }
-    if (err instanceof ForbiddenError) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
     if (err instanceof NotFoundError) {
       return NextResponse.json({ success: false, message: 'Queue not found' }, { status: 404 });
@@ -63,7 +81,6 @@ export const DELETE = auth(async (
 ) => {
   try {
     if (!_req.auth?.user) throw new UnauthorizedError();
-    requireRole(_req.auth.user, Role.CLINIC_ADMIN);
 
     const { id } = await params;
 
@@ -72,7 +89,10 @@ export const DELETE = auth(async (
     });
     if (!existing) throw new NotFoundError('Queue not found');
 
-    await prisma.queue.delete({ where: { id } });
+    await prisma.queue.update({
+      where: { id, clinicId: _req.auth.user.clinicId },
+      data: { deletedAt: new Date() },
+    });
 
     emitQueueEvent({
       type: QueueEventType.QUEUE_UPDATED,
@@ -84,9 +104,6 @@ export const DELETE = auth(async (
   } catch (err) {
     if (err instanceof UnauthorizedError) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-    }
-    if (err instanceof ForbiddenError) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
     if (err instanceof NotFoundError) {
       return NextResponse.json({ success: false, message: 'Queue not found' }, { status: 404 });

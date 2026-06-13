@@ -15,15 +15,23 @@ export async function emitQueueEvent(payload: EmitEventPayload): Promise<void> {
     if (env.SOCKET_AUTH_TOKEN) {
       headers['x-socket-token'] = env.SOCKET_AUTH_TOKEN;
     }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
     await fetch(url, {
       method: 'POST',
       headers,
+      signal: controller.signal,
       body: JSON.stringify({
         ...payload,
         timestamp: new Date().toISOString(),
       }),
     });
+    clearTimeout(timeout);
   } catch (err) {
-    console.error('[websocket] Failed to emit event:', err);
+    if (err instanceof Error && err.name === 'AbortError') {
+      console.warn('[websocket] Emit timeout — WS server may be down');
+    } else {
+      console.error('[websocket] Failed to emit event:', err);
+    }
   }
 }

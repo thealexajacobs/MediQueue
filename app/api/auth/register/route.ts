@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { sendEmail } from '@/lib/email';
 
 const registerSchema = z.object({
   clinicName: z.string().min(1, 'Clinic name is required').max(100).trim(),
@@ -51,8 +52,13 @@ export async function POST(req: Request) {
         name,
         email,
         passwordHash,
-        role: 'CLINIC_ADMIN',
       },
+    });
+
+    sendEmail({
+      to: email,
+      subject: 'Welcome to MediQueue',
+      html: `<p>Hi ${name || 'there'},</p><p>Welcome to MediQueue! Your account for <strong>${clinicName}</strong> has been created successfully.</p><p>You can now sign in to start managing your queues.</p><p><a href="${process.env.AUTH_URL || 'http://localhost:3000'}/login" style="display:inline-block;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:6px;margin-top:8px">Sign in to MediQueue</a></p>`,
     });
 
     return NextResponse.json(

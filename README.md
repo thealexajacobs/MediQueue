@@ -14,7 +14,7 @@ npm install
 
 # 2. Set up environment variables
 cp .env.example .env.local
-# Fill in DATABASE_URL and AUTH_SECRET (min 32 chars)
+# Fill in DATABASE_URL and JWT_SECRET (min 32 chars)
 
 # 3. Start PostgreSQL and create database
 createdb mediqueue
@@ -48,7 +48,7 @@ Demo credentials after seeding:
 | Variable | Required | Description |
 |---|---|---|
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `AUTH_SECRET` | Yes | Min 32-character random string |
+| `JWT_SECRET` | Yes | Min 32-character random string |
 | `AUTH_URL` | No | Defaults to `http://localhost:3000` |
 | `SOCKET_SERVER_URL` | No | Defaults to `http://localhost:3001` |
 | `UPSTASH_REDIS_REST_URL` | No | Rate limiting (Upstash Redis) |
@@ -123,7 +123,7 @@ npm i -g vercel
 vercel
 
 # Set environment variables in Vercel dashboard:
-# DATABASE_URL, AUTH_SECRET, AUTH_URL, SOCKET_SERVER_URL
+# DATABASE_URL, JWT_SECRET, AUTH_URL, SOCKET_SERVER_URL
 ```
 
 ### Socket.IO Server (Railway/Fly/Render)

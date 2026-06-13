@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Loader2, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,14 +12,17 @@ function ResetForm() {
   const token = searchParams.get('token');
 
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const passwordsMatch = password === confirmPassword;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!password.trim()) return;
+    if (!password.trim() || !passwordsMatch) return;
 
     setIsLoading(true);
     setError(null);
@@ -48,7 +52,7 @@ function ResetForm() {
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h1 className="text-xl font-bold text-foreground">Invalid reset link</h1>
         <p className="text-sm text-muted-foreground">This reset link is missing or invalid.</p>
-        <Link href="/auth?mode=login" className="text-sm font-medium text-primary underline underline-offset-2">Back to login</Link>
+        <Link href="/login" className="text-sm font-medium text-primary underline underline-offset-2">Back to login</Link>
       </div>
     );
   }
@@ -59,7 +63,7 @@ function ResetForm() {
         <CheckCircle2 className="h-12 w-12 text-emerald-500" />
         <h1 className="text-xl font-bold text-foreground">Password reset</h1>
         <p className="text-sm text-muted-foreground">Your password has been reset successfully.</p>
-        <Link href="/auth?mode=login" className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground">Sign in</Link>
+        <Link href="/login" className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground">Sign in</Link>
       </div>
     );
   }
@@ -85,17 +89,40 @@ function ResetForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoFocus
-              className="h-11 w-full rounded-lg border border-input bg-background pr-10 pl-3 text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+            {password && (
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </button>
+            )}
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="confirm-password" className="mb-1.5 block text-sm font-medium text-foreground">Confirm Password</label>
+          <div className="relative">
+            <input
+              id="confirm-password"
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+            />
+            {confirmPassword && (
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </button>
+            )}
+          </div>
+          {confirmPassword && !passwordsMatch && (
+            <p className="mt-1 text-sm text-destructive">Passwords do not match</p>
+          )}
         </div>
 
         <button
           type="submit"
-          disabled={isLoading || password.length < 8}
+          disabled={isLoading || password.length < 8 || (!!confirmPassword && !passwordsMatch)}
           className="flex h-11 items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reset password'}
@@ -107,12 +134,10 @@ function ResetForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-8">
-      <div className="w-full max-w-sm">
-        <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
-          <ResetForm />
-        </Suspense>
-      </div>
-    </div>
+    <AuthLayout>
+      <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
+        <ResetForm />
+      </Suspense>
+    </AuthLayout>
   );
 }

@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
-    AUTH_SECRET: z.string().min(32),
+    JWT_SECRET: z.string().min(32),
     AUTH_URL: z.string().url().default('http://localhost:3000'),
     SOCKET_SERVER_URL: z.string().url().default('http://localhost:3001'),
     SOCKET_AUTH_TOKEN: z.string().optional(),
@@ -17,7 +17,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
-    AUTH_SECRET: process.env.AUTH_SECRET,
+    JWT_SECRET: process.env.JWT_SECRET,
     AUTH_URL: process.env.AUTH_URL,
     SOCKET_SERVER_URL: process.env.SOCKET_SERVER_URL,
     SOCKET_AUTH_TOKEN: process.env.SOCKET_AUTH_TOKEN,

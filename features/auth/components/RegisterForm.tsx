@@ -57,7 +57,7 @@ export function RegisterForm() {
         return;
       }
 
-      router.push('/auth?mode=login&registered=true');
+      router.push('/login?registered=true');
     } catch {
       setError('Something went wrong. Please try again.');
       setIsLoading(false);

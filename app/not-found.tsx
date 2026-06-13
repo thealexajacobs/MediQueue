@@ -6,7 +6,7 @@ export default function NotFound() {
       <h1 className="text-4xl font-bold">404</h1>
       <p className="text-muted-foreground">Page not found</p>
       <Link
-        href="/auth?mode=login"
+        href="/login"
         className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
       >
         Go to Login

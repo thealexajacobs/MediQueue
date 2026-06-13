@@ -4,227 +4,498 @@
 
 ---
 
-## 1. Project Overview
+# 1. Product Overview
 
-**MediQueue** is a real-time, multi-tenant SaaS clinic queue management system.
+## Product Summary
 
-| Property | Value |
-|---|---|
-| Product Type | Multi-tenant SaaS Web Application |
-| Primary Users | Clinic receptionists and admins |
-| Core Value | Replace manual queue boards with a live digital system |
-| Real-time Requirement | < 2 second queue update propagation |
+MediQueue is a real-time clinic queue management system that helps healthcare facilities manage walk-in patient flow while providing patients with live queue visibility through QR codes and unique tracking links.
 
-### Tech Stack
+The product is designed as an operational tool, not an administration platform.
 
-| Layer | Technology | Version |
-|---|---|---|
-| Framework | Next.js (App Router) | 14+ |
-| Language | TypeScript | Strict mode |
-| ORM | Prisma | Latest |
-| Database | PostgreSQL | 15+ |
-| Real-time | WebSockets + polling fallback | — |
-| Auth | JWT via httpOnly cookies | — |
-| Styling | Tailwind CSS | 3+ |
-| Validation | Zod | Latest |
-| Password hashing | bcryptjs | Cost factor 12 |
+The primary focus is queue management, patient flow visibility, and operational efficiency.
 
 ---
 
-## 2. Required Environment Variables
+## Product Philosophy
 
-The project will not start without these. Verify they exist before any DB or auth work:
+MediQueue is a live operations system.
+
+Every feature should prioritize:
+
+1. Current patient visibility
+2. Queue progression
+3. Fast queue actions
+4. Real-time updates
+5. Minimal navigation
+
+Avoid building:
+
+* Hospital management software
+* Administration-heavy workflows
+* Complex configuration systems
+* Enterprise reporting platforms
+
+The product should feel closer to a modern operations center than a traditional SaaS dashboard.
+
+---
+
+## Product Scope
+
+### Core Workflow
+
+Clinic staff:
+
+* Select queue
+* Add patient
+* Call next patient
+* Skip patient
+* Complete patient
+
+Patients:
+
+* Scan QR code or open tracking link
+* View queue position
+* View current serving patient
+* Receive live queue updates
+
+---
+
+## Tech Stack
+
+| Layer            | Technology             |
+| ---------------- | ---------------------- |
+| Framework        | Next.js App Router     |
+| Language         | TypeScript             |
+| ORM              | Prisma                 |
+| Database         | PostgreSQL             |
+| Real-Time        | WebSockets             |
+| Authentication   | JWT (httpOnly cookies) |
+| Styling          | Tailwind CSS           |
+| Validation       | Zod                    |
+| Password Hashing | bcryptjs               |
+
+---
+
+# 2. Required Environment Variables
 
 ```env
-DATABASE_URL=           # PostgreSQL connection string
-JWT_SECRET=             # Min 32-character random string (NEVER commit)
-NEXTAUTH_SECRET=        # If using NextAuth adapter
+DATABASE_URL=
+JWT_SECRET=
 ```
 
-Add a startup check in `lib/env.ts` that throws on missing variables.
+Application startup must fail if any required variable is missing.
+
+Validate inside:
+
+```text
+lib/env.ts
+```
 
 ---
 
-## 3. Project Constraints (Non-Negotiable)
+# 3. Project Constraints (Non-Negotiable)
 
-These rules override everything. The agent must never violate them regardless of task framing:
+## Dashboard First
 
-1. **Single dashboard** — All staff operations happen at `/dashboard`. There is NO role-split UI. CLINIC_ADMIN and RECEPTIONIST see the same interface.
-2. **Tenant isolation is absolute** — Every Prisma query on tenant data must be scoped by `clinicId`. `clinicId` always comes from the verified JWT, never from the request body or URL params.
-3. **No auth on public patient routes** — `/q/[queueEntryId]` is read-only and requires zero authentication.
-4. **Real-time first** — Every queue mutation (add, call, skip, complete) must emit a WebSocket event after the DB write.
-5. **No internal errors to frontend** — Stack traces, query details, and raw error messages must never reach the client. Log server-side only.
-6. **No passwordHash in responses** — Always use Prisma `select` to exclude it. This field must never appear in any API response.
+All operations occur inside:
+
+```text
+/dashboard
+```
+
+There are no separate admin or receptionist dashboards.
 
 ---
 
-## 4. Agent Trigger Map
+## Single Clinic Account Model
 
-Use this table to determine which files to load before acting on any task:
+The MVP uses a single clinic account.
 
-| Task Type | Load These Files |
-|---|---|
-| Creating or editing a React component | `rules/design-system.md` + `rules/code-style.md` + `skills/component-builder/SKILL.md` |
-| Creating or editing an API route | `rules/architecture.md` + `rules/code-style.md` + `rules/security.md` |
-| Modifying Prisma schema | `rules/architecture.md` + `skills/db-migration-runner/SKILL.md` |
-| Running a DB migration | `skills/db-migration-runner/SKILL.md` |
-| Any authentication or session logic | `rules/security.md` |
-| Any new file or folder creation | `rules/architecture.md` |
-| Any UI styling or layout work | `rules/design-system.md` |
-| Writing business logic in `lib/` | `rules/code-style.md` + `rules/architecture.md` |
-| Debugging a security or data access issue | `rules/security.md` + `rules/architecture.md` |
+Do not build:
 
-When in doubt, load `rules/architecture.md` and `rules/code-style.md` as a baseline.
+* Staff management
+* Invitations
+* Role assignment
+* Permission management
 
 ---
 
-## 5. File & Folder Reference
+## Public Patient Access
 
-### Agent Context Files
-```
-.agents/
-  AGENTS.md                    ← this file (root config)
-  rules/
-    architecture.md            ← folder structure, DB models, API conventions, WS events
-    code-style.md              ← TypeScript rules, naming, component patterns, imports
-    design-system.md           ← colors, typography, component specs, layout, motion
-    security.md                ← JWT, RBAC, tenant isolation, input validation, headers
+Patient tracking routes:
+
+```text
+/q/[queueEntryId]
 ```
 
-### Skills
-```
-skills/
-  component-builder/
-    SKILL.md                   ← step-by-step guide for building any React component
-  db-migration-runner/
-    SKILL.md                   ← schema changes, migration commands, seeding, rollback
+Must:
+
+* Require no authentication
+* Be read-only
+* Never expose clinic data beyond queue status
+
+---
+
+## Real-Time First
+
+Every queue mutation must trigger a real-time event.
+
+Examples:
+
+* Add patient
+* Call next
+* Skip patient
+* Complete patient
+
+All connected clients must update instantly.
+
+---
+
+## Tenant Isolation
+
+Every database query involving clinic data must be scoped by:
+
+```typescript
+clinicId
 ```
 
-### Application Source
+Clinic identity must come from authenticated session data only.
+
+Never trust client-supplied clinic IDs.
+
+---
+
+## Security
+
+Never expose:
+
+* Stack traces
+* Database errors
+* Internal implementation details
+
+Log errors server-side only.
+
+---
+
+# 4. Core Application Structure
+
+---
+
+## Dashboard
+
+Primary operational screen.
+
+Route:
+
+```text
+/dashboard
 ```
+
+### Dashboard Sections
+
+#### Queue Tabs
+
+Examples:
+
+* General Consultation
+* Dental
+* Pediatrics
+* Pharmacy
+
+Used for switching queues.
+
+---
+
+#### Current Patient Hero
+
+Primary focal point.
+
+Displays:
+
+* Queue Number
+* Patient Name
+* Current Status
+* Waiting Time
+
+---
+
+#### Queue Metrics
+
+Displays:
+
+* Waiting
+* Serving
+* Completed Today
+* Average Wait Time
+
+---
+
+#### Queue Actions
+
+Primary actions:
+
+* Add Patient
+* Call Next
+* Skip
+* Complete
+
+---
+
+#### Next Up Queue
+
+Displays upcoming patients.
+
+Focus on readability.
+
+Avoid large tables.
+
+---
+
+#### Recent Activity
+
+Displays recent queue events:
+
+* Patient Added
+* Patient Called
+* Patient Completed
+* Patient Skipped
+
+---
+
+## Analytics
+
+Separate page.
+
+Route:
+
+```text
+/dashboard/analytics
+```
+
+Purpose:
+
+Provide lightweight operational insights.
+
+### Analytics Sections
+
+#### Overview
+
+* Patients Today
+* Average Wait Time
+* Active Queues
+* Completed Today
+
+#### Queue Performance
+
+Table:
+
+* Queue Name
+* Patients Served
+* Average Wait Time
+
+#### Daily Activity
+
+Simple activity chart.
+
+Do not add:
+
+* Revenue
+* Billing
+* Productivity reports
+* Advanced filters
+
+---
+
+## Settings
+
+Settings are accessed from the user avatar.
+
+Use a right-side drawer.
+
+Do not create a dedicated settings dashboard.
+
+### Facility
+
+Fields:
+
+* Facility Name
+* Facility Logo
+
+### Account
+
+Fields:
+
+* Full Name
+* Email
+* Change Password
+
+Do not include:
+
+* Staff Management
+* Roles
+* Billing
+* Notifications
+* Integrations
+* Appearance Settings
+
+---
+
+# 5. Folder Structure
+
+```text
 app/
-  (auth)/
-    login/page.tsx
-    signup/page.tsx
-  dashboard/
-    page.tsx                   ← Unified operations dashboard (ONLY operational UI)
-    layout.tsx
-  q/
-    [queueEntryId]/
-      page.tsx                 ← Public patient view — NO auth required
-  api/
-    auth/route.ts
-    clinics/route.ts
-    queues/route.ts
-    queue-entries/route.ts
-    analytics/route.ts
-    ws/route.ts                ← WebSocket handler
 
-components/
-  ui/                          ← Shared primitives: Button, Badge, Modal, Spinner, Input
-  dashboard/                   ← Dashboard panels: QueuePanel, LiveStatusPanel, QueueSwitcher, ActionsBar
-  queue/                       ← Queue components: QueueEntryCard, PatientAddModal, QueueNumberDisplay
-
-lib/
-  prisma.ts                    ← Prisma client singleton (import from here, never instantiate directly)
-  auth.ts                      ← requireAuth(), requireRole(), JWT sign/verify
-  websocket.ts                 ← emitQueueEvent(), WS server setup
-  queue.ts                     ← Business logic: getNextPosition(), assignQueueNumber()
-  env.ts                       ← Startup env var validation
-  errors.ts                    ← Custom error classes: UnauthorizedError, ForbiddenError, NotFoundError
-
-prisma/
-  schema.prisma
-  migrations/
-  seed.ts
-
-types/
-  index.ts                     ← All shared TypeScript interfaces and enums
+├── (auth)
+│   ├── login/page.tsx
+│   └── register/page.tsx
+│
+├── dashboard
+│   ├── page.tsx
+│   └── analytics/page.tsx
+│
+├── q
+│   └── [queueEntryId]/page.tsx
+│
+└── api
+    ├── auth
+    ├── queues
+    ├── queue-entries
+    ├── analytics
+    └── websocket
 ```
 
 ---
 
-## 6. Core Data Models (Quick Reference)
+# 6. Core Data Models
 
-| Model | Key Fields | Tenant Scoped? |
-|---|---|---|
-| `Clinic` | `id`, `name` | — (is the tenant) |
-| `User` | `clinicId`, `email`, `passwordHash`, `role` | ✅ |
-| `Queue` | `clinicId`, `name`, `status` | ✅ |
-| `QueueEntry` | `queueId`, `patientName`, `phone`, `queueNumber`, `status`, `position` | ✅ via Queue |
-| `QueueEvent` | `queueId`, `entryId`, `eventType` | ✅ via Queue |
-| `AnalyticsRecord` | `clinicId`, `queueId`, `date`, `metrics` (JSON) | ✅ |
+## Clinic
 
-Full Prisma schemas are in `rules/architecture.md`.
-
----
-
-## 7. WebSocket Events (Quick Reference)
-
-Every queue mutation must emit one of these after the DB write:
-
-| Event | When |
-|---|---|
-| `patient_added` | New QueueEntry created |
-| `patient_called` | Entry status → SERVING |
-| `patient_skipped` | Entry status → SKIPPED |
-| `patient_completed` | Entry status → COMPLETED |
-| `queue_updated` | Any other queue state change |
-
-Full WS rules in `rules/architecture.md`.
-
----
-
-## 8. User Roles (Quick Reference)
-
-| Action | RECEPTIONIST | CLINIC_ADMIN |
-|---|---|---|
-| Add patient, call next, skip, complete | ✅ | ✅ |
-| View analytics | ✅ | ✅ |
-| Create/edit/delete queues | ❌ | ✅ |
-| Manage staff accounts | ❌ | ✅ |
-| Edit clinic settings | ❌ | ✅ |
-
-Role checks happen **server-side only**, enforced via `requireRole()` in `lib/auth.ts`. Full RBAC rules in `rules/security.md`.
-
----
-
-## 9. Project Setup (Bootstrap Commands)
-
-Run these in order when setting up a fresh environment:
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Set up environment variables
-cp .env.example .env.local
-# Fill in DATABASE_URL and JWT_SECRET
-
-# 3. Run database migrations
-npx prisma migrate dev
-
-# 4. Generate Prisma client
-npx prisma generate
-
-# 5. Seed the database
-npx prisma db seed
-
-# 6. Start the dev server
-npm run dev
+```text
+id
+name
+logo
+createdAt
 ```
 
 ---
 
-## 10. Agent Error Escalation
+## User
 
-If the agent is blocked or uncertain:
+```text
+id
+clinicId
+email
+passwordHash
+createdAt
+```
 
-| Situation | Action |
-|---|---|
-| Unsure which folder a file belongs in | Read `rules/architecture.md` Section: Folder Structure |
-| Unsure how to handle auth in a route | Read `rules/security.md` Section: Authentication |
-| Unsure which Prisma query pattern to use | Read `rules/architecture.md` Section: Multi-Tenancy Rules |
-| Schema change would break existing data | Stop. Document the risk and propose a two-step migration plan before proceeding |
-| Task would require violating a Project Constraint (Section 3) | Stop. State which constraint is at risk and ask for clarification |
-| Env vars missing | Stop. List the missing variables and do not attempt DB operations ||
+---
+
+## Queue
+
+```text
+id
+clinicId
+name
+status
+createdAt
+```
+
+---
+
+## QueueEntry
+
+```text
+id
+queueId
+patientName
+phone
+queueNumber
+status
+position
+createdAt
+```
+
+---
+
+## QueueEvent
+
+```text
+id
+queueId
+entryId
+eventType
+timestamp
+```
+
+---
+
+## AnalyticsRecord
+
+```text
+id
+clinicId
+queueId
+date
+metrics
+```
+
+---
+
+# 7. WebSocket Events
+
+Every queue mutation must emit:
+
+```text
+patient_added
+patient_called
+patient_skipped
+patient_completed
+queue_updated
+```
+
+Events must be emitted after successful database writes.
+
+---
+
+# 8. Design Principles
+
+The interface should feel:
+
+* Modern
+* Minimal
+* Fast
+* Operational
+* Professional
+
+Inspired by:
+
+* Linear
+* Stripe
+* Notion Calendar
+* Modern dispatch software
+
+Avoid:
+
+* Admin templates
+* Enterprise dashboards
+* Heavy navigation
+* Data overload
+
+---
+
+# 9. Agent Error Escalation
+
+Stop and request clarification when:
+
+* A task introduces staff management
+* A task introduces role-based UI
+* A task introduces hospital-management features
+* A task introduces scheduling systems
+* A task introduces billing or insurance workflows
+* A task violates tenant isolation
+* A task exposes internal system details
+
+Always preserve the core MediQueue principle:
+
+> Fast queue operations and real-time patient visibility are more important than administration, configuration, or reporting.

@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  RECEPTIONIST
-  CLINIC_ADMIN
-}
-
 enum QueueStatus {
   ACTIVE
   PAUSED
@@ -36,6 +31,7 @@ enum QueueEventType {
 model Clinic {
   id        String   @id @default(uuid())
   name      String
+  logo      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -50,7 +46,6 @@ model User {
   name         String   @default("")
   email        String   @unique
   passwordHash String
-  role         Role     @default(RECEPTIONIST)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -65,6 +60,7 @@ model Queue {
   clinicId  String
   name      String
   status    QueueStatus @default(ACTIVE)
+  deletedAt DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
@@ -76,6 +72,7 @@ model Queue {
   @@unique([clinicId, name])
   @@index([clinicId])
   @@index([clinicId, status])
+  @@index([deletedAt])
 }
 
 model QueueEntry {

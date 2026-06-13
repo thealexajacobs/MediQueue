@@ -26,7 +26,7 @@ function verifyResetToken(token: string): { email: string } | null {
     const email = parts[0];
     const timestamp = parseInt(parts[1], 10);
     if (isNaN(timestamp) || Date.now() > timestamp) return null;
-    const expectedHmac = createHmac('sha256', process.env.AUTH_SECRET!).update(payload).digest('hex');
+    const expectedHmac = createHmac('sha256', process.env.JWT_SECRET!).update(payload).digest('hex');
     if (hmac !== expectedHmac) return null;
     return { email };
   } catch {

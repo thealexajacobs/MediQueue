@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/features/auth/schemas/login';
@@ -17,10 +18,14 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
+
+  const passwordValue = watch('password', '');
+  const hasPassword = !!passwordValue;
 
   async function onSubmit(data: LoginInput) {
     setIsLoading(true);
@@ -67,9 +72,14 @@ export function LoginForm() {
       </div>
 
       <div>
-        <label htmlFor="password" className="mb-1 block text-sm text-muted-foreground">
-          Password
-        </label>
+        <div className="mb-1 flex items-center justify-between">
+          <label htmlFor="password" className="text-sm text-muted-foreground">
+            Password
+          </label>
+          <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         <div className="relative">
           <input
             id="password"
@@ -80,14 +90,16 @@ export function LoginForm() {
             onFocus={clearError}
             {...register('password')}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+          {hasPassword && (
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              tabIndex={-1}
+            >
+              {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </button>
+          )}
         </div>
         {errors.password && (
           <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
@@ -101,6 +113,13 @@ export function LoginForm() {
       >
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign in'}
       </button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{' '}
+        <Link href="/onboarding?fresh=1" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+          Create one
+        </Link>
+      </p>
     </form>
   );
 }

@@ -84,7 +84,7 @@ export const PATCH = auth(async (
       });
 
       if (autoCompletedId) {
-        await emitQueueEvent({
+        emitQueueEvent({
           type: QueueEventType.PATIENT_COMPLETED,
           clinicId,
           queueId: entry.queueId,
@@ -94,7 +94,7 @@ export const PATCH = auth(async (
 
       await recalculatePositions(entry.queueId);
 
-      await emitQueueEvent({
+      emitQueueEvent({
         type: QueueEventType.PATIENT_CALLED,
         clinicId,
         queueId: entry.queueId,
@@ -121,7 +121,7 @@ export const PATCH = auth(async (
 
       await recalculatePositions(entry.queueId);
 
-      await emitQueueEvent({
+      emitQueueEvent({
         type: action === 'skip' ? QueueEventType.PATIENT_SKIPPED : QueueEventType.PATIENT_COMPLETED,
         clinicId,
         queueId: entry.queueId,

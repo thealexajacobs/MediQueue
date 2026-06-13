@@ -27,9 +27,10 @@ export function useQueueSubscription({
     const socket = io(socketUrl, {
       query: { clinicId, queueId },
       transports: ['websocket', 'polling'],
-      reconnectionAttempts: 20,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 10000,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 5000,
+      timeout: 5000,
     });
 
     socket.on('connect', () => {

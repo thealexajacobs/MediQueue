@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { AlertTriangle, Clock, TrendingUp, CheckCircle2, X, Info } from 'lucide-react';
 
 interface Alert {
@@ -37,7 +37,7 @@ const STYLES: Record<string, { border: string; bg: string; text: string; icon: R
   },
 };
 
-export function AlertsPanel({
+export const AlertsPanel = memo(function AlertsPanel({
   waitingCount,
   avgWaitTime,
 }: {
@@ -71,15 +71,6 @@ export function AlertsPanel({
     });
   }
 
-  if (avgWaitTime > 20 && waitingCount > 0) {
-    alerts.push({
-      id: 'wait-time',
-      type: 'warning',
-      title: 'Extended wait times',
-      message: `Patients are waiting longer than expected (~${avgWaitTime}m). Consider increasing throughput.`,
-    });
-  }
-
   const visible = alerts.filter((a) => !dismissed.has(a.id));
   if (visible.length === 0) return null;
 
@@ -110,4 +101,4 @@ export function AlertsPanel({
       })}
     </div>
   );
-}
+});

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Loader2, Copy, Printer, Check, ChevronDown, UserPlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { addPatientSchema, type AddPatientInput } from '@/features/queue-entries/schemas/entry';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
@@ -25,6 +26,7 @@ interface AddedPatient {
 }
 
 export function AddPatientModal({ open, onClose, queueId, queueName, queues }: AddPatientModalProps) {
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [addedPatient, setAddedPatient] = useState<AddedPatient | null>(null);
   const [selectedQueueId, setSelectedQueueId] = useState(queueId);
@@ -97,6 +99,7 @@ export function AddPatientModal({ open, onClose, queueId, queueName, queues }: A
         return;
       }
       setAddedPatient(json.data);
+      queryClient.invalidateQueries({ queryKey: ['queue-entries', selectedQueueId] });
       toast.success('Patient added to queue');
     } catch {
       toast.error('Something went wrong');

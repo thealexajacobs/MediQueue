@@ -7,7 +7,7 @@ import {
   Check, ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useQueues, useCreateQueue, useUpdateQueue, useDeleteQueue } from '@/features/queues/hooks/useQueueMutations';
+import { useQueues, useCreateQueue, useUpdateQueue, useDeleteQueue, useArchivedQueues, useRestoreQueue } from '@/features/queues/hooks/useQueueMutations';
 import { Button } from '@/components/ui/Button';
 
 interface SettingsModalProps {
@@ -22,15 +22,17 @@ interface SettingsModalProps {
 export function SettingsModal({ open, onClose, clinicName, clinicId, userName, userEmail }: SettingsModalProps) {
   const { data: session, update: updateSession } = useSession();
   const { data: queues } = useQueues();
+  const { data: archivedQueues } = useArchivedQueues();
   const createQueue = useCreateQueue();
   const updateQueue = useUpdateQueue();
   const deleteQueue = useDeleteQueue();
+  const restoreQueue = useRestoreQueue();
 
   const [facilityName, setFacilityName] = useState(clinicName ?? '');
   const [facilityDirty, setFacilityDirty] = useState(false);
   const [savingFacility, setSavingFacility] = useState(false);
 
-  const [displayName, setDisplayName] = useState(userName ?? session?.user?.name ?? '');
+  const [displayName, setDisplayName] = useState(clinicName ?? '');
   const [profileDirty, setProfileDirty] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -50,7 +52,7 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
   useEffect(() => {
     if (open) {
       setFacilityName(clinicName ?? '');
-      setDisplayName(userName ?? session?.user?.name ?? '');
+      setDisplayName(clinicName ?? '');
       setFacilityDirty(false);
       setProfileDirty(false);
       setSendingReset(false);
@@ -148,8 +150,8 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
       await updateQueue.mutateAsync({ id, name: editingQueueName.trim() });
       setEditingQueueId(null);
       toast.success('Queue renamed');
-    } catch {
-      toast.error('Failed to rename queue');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to rename queue');
     }
   }
 
@@ -162,6 +164,15 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
       toast.error('Failed to archive queue');
     } finally {
       setArchivingQueueId(null);
+    }
+  }
+
+  async function handleRestoreQueue(id: string) {
+    try {
+      await restoreQueue.mutateAsync(id);
+      toast.success('Queue restored');
+    } catch {
+      toast.error('Failed to restore queue');
     }
   }
 
@@ -371,7 +382,7 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
               <div className="mt-4 space-y-4">
                 <div>
                   <label htmlFor="display-name" className="mb-1.5 block text-sm font-medium text-foreground">
-                    Full Name
+                    Facility Name
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -420,6 +431,39 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
                 </div>
               </div>
             </section>
+
+            {/* ========== ARCHIVED ========== */}
+            {archivedQueues && archivedQueues.length > 0 && (
+              <>
+                <div className="border-t border-border/10" />
+                <section>
+                  <h3 className="text-sm font-semibold text-foreground">Archived</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Archived departments can be restored at any time.
+                  </p>
+
+                  <div className="mt-3 space-y-1.5">
+                    {archivedQueues.map((queue) => (
+                      <div
+                        key={queue.id}
+                        className="flex items-center gap-2 rounded-lg border border-border/10 bg-muted/20 px-3 py-2.5"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-muted-foreground line-through truncate">{queue.name}</p>
+                        </div>
+                        <button
+                          onClick={() => handleRestoreQueue(queue.id)}
+                          disabled={restoreQueue.isPending}
+                          className="rounded px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                        >
+                          Restore
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </>
+            )}
 
           </div>
         </div>

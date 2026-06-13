@@ -1,8 +1,3 @@
-export enum Role {
-  RECEPTIONIST = 'RECEPTIONIST',
-  CLINIC_ADMIN = 'CLINIC_ADMIN',
-}
-
 export enum QueueStatus {
   ACTIVE = 'ACTIVE',
   PAUSED = 'PAUSED',
@@ -27,7 +22,6 @@ export enum QueueEventType {
 export interface AuthPayload {
   userId: string;
   clinicId: string;
-  role: Role;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -50,7 +44,6 @@ export interface ClinicDTO {
 export interface UserDTO {
   id: string;
   email: string;
-  role: Role;
   clinicId: string;
   createdAt: Date;
 }
@@ -61,6 +54,7 @@ export interface QueueDTO {
   name: string;
   status: QueueStatus;
   waitingCount?: number;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -55,6 +55,7 @@ export function useUpdateQueue() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['queues'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-queues'] });
     },
   });
 }
@@ -70,6 +71,42 @@ export function useDeleteQueue() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['queues'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-queues'] });
+    },
+  });
+}
+
+async function fetchArchivedQueues(): Promise<QueueDTO[]> {
+  const res = await fetch('/api/queues?all=true');
+  const json = await res.json();
+  if (!json.success) throw new Error(json.message);
+  return (json.data as QueueDTO[]).filter((q) => q.deletedAt);
+}
+
+export function useArchivedQueues() {
+  return useQuery({
+    queryKey: ['archived-queues'],
+    queryFn: fetchArchivedQueues,
+  });
+}
+
+export function useRestoreQueue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/queues/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restore: true }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+      return json.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['queues'] });
+      queryClient.invalidateQueries({ queryKey: ['archived-queues'] });
     },
   });
 }

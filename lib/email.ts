@@ -3,7 +3,7 @@ import { env } from '@/lib/env';
 
 const resend = new Resend(env.RESEND_API_KEY);
 
-const FROM_EMAIL = 'MediQueue <notifications@mediqueue.app>';
+const FROM_EMAIL = 'MediQueue <onboarding@resend.dev>';
 
 export async function sendEmail({
   to,
