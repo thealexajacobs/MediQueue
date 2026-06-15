@@ -31,7 +31,7 @@ export default async function OnboardingPage({
   }
 
   const queueCount = await prisma.queue.count({
-    where: { clinicId: session.user.clinicId },
+    where: { facilityId: session.user.facilityId },
   });
 
   if (queueCount > 0) redirect('/dashboard');

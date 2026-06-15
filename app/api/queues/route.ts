@@ -13,7 +13,7 @@ export const GET = auth(async (req) => {
 
     const queues = await prisma.queue.findMany({
       where: {
-        clinicId: req.auth.user.clinicId,
+        facilityId: req.auth.user.facilityId,
         ...(showAll ? {} : { deletedAt: null }),
       },
       orderBy: { createdAt: 'asc' },
@@ -52,7 +52,7 @@ export const POST = auth(async (req) => {
 
     const queue = await prisma.queue.create({
       data: {
-        clinicId: req.auth.user.clinicId,
+        facilityId: req.auth.user.facilityId,
         name: parsed.data.name,
       },
     });

@@ -34,14 +34,14 @@ export const PATCH = auth(async (
     }
 
     const { action } = parsed.data;
-    const clinicId = req.auth.user.clinicId;
+    const facilityId = req.auth.user.facilityId;
 
     const entry = await prisma.queueEntry.findUnique({
       where: { id },
-      include: { queue: { select: { clinicId: true } } },
+      include: { queue: { select: { facilityId: true } } },
     });
     if (!entry) throw new NotFoundError('Entry not found');
-    if (entry.queue.clinicId !== req.auth.user.clinicId) {
+    if (entry.queue.facilityId !== req.auth.user.facilityId) {
       return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
 
@@ -86,7 +86,7 @@ export const PATCH = auth(async (
       if (autoCompletedId) {
         emitQueueEvent({
           type: QueueEventType.PATIENT_COMPLETED,
-          clinicId,
+          facilityId,
           queueId: entry.queueId,
           entryId: autoCompletedId,
         });
@@ -96,7 +96,7 @@ export const PATCH = auth(async (
 
       emitQueueEvent({
         type: QueueEventType.PATIENT_CALLED,
-        clinicId,
+        facilityId,
         queueId: entry.queueId,
         entryId: id,
       });
@@ -123,7 +123,7 @@ export const PATCH = auth(async (
 
       emitQueueEvent({
         type: action === 'skip' ? QueueEventType.PATIENT_SKIPPED : QueueEventType.PATIENT_COMPLETED,
-        clinicId,
+        facilityId,
         queueId: entry.queueId,
         entryId: id,
       });

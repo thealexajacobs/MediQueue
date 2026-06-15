@@ -3,7 +3,7 @@ import type { QueueEventType } from '@/types';
 
 interface EmitEventPayload {
   type: QueueEventType;
-  clinicId: string;
+  facilityId: string;
   queueId: string;
   entryId?: string;
 }

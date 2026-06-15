@@ -156,7 +156,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
 
       <div className="relative z-10 flex flex-col h-screen">
         <TopBar
-          clinicName={propClinicName ?? 'Clinic'}
+          clinicName={propClinicName ?? 'Facility'}
           onSettingsClick={() => setIsSettingsOpen(true)}
         />
 
@@ -232,7 +232,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
       <SettingsModal
         open={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        clinicName={propClinicName ?? 'Clinic'}
+        clinicName={propClinicName ?? 'Facility'}
         clinicId={clinicId}
         userName={userName ?? ''}
         userEmail={userEmail ?? ''}

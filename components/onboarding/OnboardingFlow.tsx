@@ -203,7 +203,8 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   type="text"
                   autoFocus
                   autoComplete="organization"
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  placeholder=" "
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 focus:bg-background [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
 
                   {...step1Form.register('facilityName')}
                 />
@@ -225,7 +226,8 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   id="email"
                   type="email"
                   autoComplete="email"
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  placeholder=" "
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 focus:bg-background [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
 
                   {...step1Form.register('email')}
                 />
@@ -245,7 +247,8 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  placeholder=" "
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 focus:bg-background [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
 
                   {...step1Form.register('password')}
                 />
@@ -407,6 +410,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
               <input
                 type="text"
                 value={customDeptInput}
+                placeholder=" "
                 onChange={(e) => setCustomDeptInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -418,7 +422,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                     }
                   }
                 }}
-                className="h-10 flex-1 rounded-lg border border-input bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                className="h-10 flex-1 rounded-lg border border-input bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
 
               />
               <button

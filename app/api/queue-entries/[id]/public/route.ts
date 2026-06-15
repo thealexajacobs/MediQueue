@@ -37,9 +37,13 @@ export async function GET(
       select: { queueNumber: true, patientName: true },
     });
 
-    const waitingCount = await prisma.queueEntry.count({
+    const totalCount = await prisma.queueEntry.count({
       where: { queueId: entry.queueId, status: 'WAITING' },
     });
+
+    const aheadCount = entry.status === 'WAITING'
+      ? Math.max(0, totalCount - 1)
+      : totalCount;
 
     const recentCompleted = await prisma.queueEvent.findMany({
       where: { queueId: entry.queueId, eventType: 'PATIENT_COMPLETED', entryId: { not: null } },
@@ -85,7 +89,8 @@ export async function GET(
         serving: serving
           ? { queueNumber: serving.queueNumber, patientName: serving.patientName }
           : null,
-        waitingCount,
+        waitingCount: aheadCount,
+        totalInQueue: totalCount + (serving ? 1 : 0),
         estWaitMinutes,
       },
     });

@@ -61,7 +61,8 @@ export function LoginForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className="h-11 w-full rounded-sm border border-input bg-card px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+          placeholder=" "
+          className="h-11 w-full rounded-sm border border-input bg-card px-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary focus:bg-card [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
 
           onFocus={clearError}
           {...register('email')}
@@ -85,7 +86,8 @@ export function LoginForm() {
             id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
-            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+            placeholder=" "
+            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary focus:bg-card [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
 
             onFocus={clearError}
             {...register('password')}

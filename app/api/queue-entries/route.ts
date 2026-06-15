@@ -19,7 +19,7 @@ export const GET = auth(async (req) => {
     }
 
     const queue = await prisma.queue.findFirst({
-      where: { id: queueId, clinicId: req.auth.user.clinicId },
+      where: { id: queueId, facilityId: req.auth.user.facilityId },
     });
     if (!queue) {
       return NextResponse.json({ success: false, message: 'Queue not found' }, { status: 404 });
@@ -55,7 +55,7 @@ export const POST = auth(async (req) => {
     const { queueId, patientName, phone } = parsed.data;
 
     const queue = await prisma.queue.findFirst({
-      where: { id: queueId, clinicId: req.auth.user.clinicId },
+      where: { id: queueId, facilityId: req.auth.user.facilityId },
     });
     if (!queue) {
       return NextResponse.json({ success: false, message: 'Queue not found' }, { status: 404 });
@@ -85,7 +85,7 @@ export const POST = auth(async (req) => {
 
     await emitQueueEvent({
       type: QueueEventType.PATIENT_ADDED,
-      clinicId: req.auth.user.clinicId,
+      facilityId: req.auth.user.facilityId,
       queueId,
       entryId: entry.id,
     });

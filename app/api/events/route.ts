@@ -17,7 +17,7 @@ export const GET = auth(async (req) => {
     }
 
     const queue = await prisma.queue.findFirst({
-      where: { id: queueId, clinicId: req.auth.user.clinicId },
+      where: { id: queueId, facilityId: req.auth.user.facilityId },
       select: { id: true },
     });
     if (!queue) {

@@ -25,7 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: true,
             email: true,
             passwordHash: true,
-            clinicId: true,
+            facilityId: true,
           },
         });
 
@@ -38,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           name: user.name || user.email.split('@')[0],
           email: user.email,
-          clinicId: user.clinicId,
+          facilityId: user.facilityId,
         };
       },
     }),
@@ -48,7 +48,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.name = user.name;
-        token.clinicId = (user as { clinicId: string }).clinicId;
+        token.facilityId = (user as { facilityId: string }).facilityId;
       }
       return token;
     },
@@ -56,7 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
-        session.user.clinicId = token.clinicId as string;
+        session.user.facilityId = token.facilityId as string;
       }
       return session;
     },

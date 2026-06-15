@@ -4,7 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Models that have a direct clinicId field — enforce clinicId in where/data
+// Models that have a direct facilityId field — enforce facilityId in where/data
 const directTenantModels = ['Queue', 'AnalyticsRecord'];
 
 function getUrl() {
@@ -23,12 +23,12 @@ export const prisma =
 prisma.$use(async (params, next) => {
   const model = params.model ?? '';
   if (directTenantModels.includes(model)) {
-    if (params.action === 'create' && !params.args.data?.clinicId) {
-      throw new Error(`clinicId required for ${model} creation`);
+    if (params.action === 'create' && !params.args.data?.facilityId) {
+      throw new Error(`facilityId required for ${model} creation`);
     }
     if (['update', 'delete', 'updateMany', 'deleteMany'].includes(params.action)) {
-      if (!params.args.where?.clinicId) {
-        throw new Error(`clinicId required in where clause for ${model} ${params.action}`);
+      if (!params.args.where?.facilityId) {
+        throw new Error(`facilityId required in where clause for ${model} ${params.action}`);
       }
     }
   }

@@ -47,16 +47,16 @@ export function QueueProgress({ entries }: QueueProgressProps) {
           {waiting.map((entry) => (
             <div
               key={entry.id}
-              className="group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 transition-all hover:bg-white/5 hover:border-white/10 hover:shadow-sm"
+              className="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background border border-border/30 text-xs font-bold text-muted-foreground shadow-sm group-hover:bg-primary/5 group-hover:border-primary/20 group-hover:text-primary transition-colors">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background border border-border/30 text-xs font-bold text-muted-foreground shadow-sm">
                 {entry.position}
               </span>
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 shadow-sm">
                 <User className="h-3.5 w-3.5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                <p className="text-sm font-semibold text-foreground truncate">
                   <span className="text-muted-foreground/70 font-normal mr-1">{pad(entry.queueNumber)}</span>
                   {entry.patientName}
                 </p>

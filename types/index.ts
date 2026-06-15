@@ -21,7 +21,7 @@ export enum QueueEventType {
 
 export interface AuthPayload {
   userId: string;
-  clinicId: string;
+  facilityId: string;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -44,13 +44,13 @@ export interface ClinicDTO {
 export interface UserDTO {
   id: string;
   email: string;
-  clinicId: string;
+  facilityId: string;
   createdAt: Date;
 }
 
 export interface QueueDTO {
   id: string;
-  clinicId: string;
+  facilityId: string;
   name: string;
   status: QueueStatus;
   waitingCount?: number;
@@ -81,7 +81,7 @@ export interface QueueEventDTO {
 
 export interface AnalyticsDTO {
   id: string;
-  clinicId: string;
+  facilityId: string;
   queueId: string;
   date: Date;
   metrics: Record<string, unknown>;
@@ -89,7 +89,7 @@ export interface AnalyticsDTO {
 
 export interface WSQueueEvent {
   type: QueueEventType;
-  clinicId: string;
+  facilityId: string;
   queueId: string;
   entryId?: string;
   timestamp: string;

@@ -11,17 +11,17 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const [clinic, allQueues, activeQueues] = await Promise.all([
-    prisma.clinic.findUnique({
-      where: { id: session.user.clinicId },
+  const [facility, allQueues, activeQueues] = await Promise.all([
+    prisma.facility.findUnique({
+      where: { id: session.user.facilityId },
       select: { name: true },
     }),
     prisma.queue.findMany({
-      where: { clinicId: session.user.clinicId },
+      where: { facilityId: session.user.facilityId },
       orderBy: { createdAt: 'asc' },
     }),
     prisma.queue.findMany({
-      where: { clinicId: session.user.clinicId, deletedAt: null },
+      where: { facilityId: session.user.facilityId, deletedAt: null },
       orderBy: { createdAt: 'asc' },
     }),
   ]);
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
 
   const queuesWithCounts: QueueDTO[] = activeQueues.map((queue) => ({
     id: queue.id,
-    clinicId: queue.clinicId,
+    facilityId: queue.facilityId,
     name: queue.name,
     status: queue.status as QueueDTO['status'],
     deletedAt: null,
@@ -56,8 +56,8 @@ export default async function DashboardPage() {
 
   return (
     <DashboardShell
-      clinicName={clinic?.name ?? 'Clinic'}
-      clinicId={session.user.clinicId}
+      clinicName={facility?.name ?? 'Facility'}
+      clinicId={session.user.facilityId}
       userName={session.user.name ?? ''}
       userEmail={session.user.email ?? ''}
       initialQueues={queuesWithCounts}

@@ -4,17 +4,17 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const clinic = await prisma.clinic.upsert({
-    where: { id: 'demo-clinic-1' },
+  const facility = await prisma.facility.upsert({
+    where: { id: 'demo-facility-1' },
     update: {},
-    create: { id: 'demo-clinic-1', name: 'MediQueue Demo Clinic' },
+    create: { id: 'demo-facility-1', name: 'MediQueue Demo Facility' },
   });
 
   await prisma.user.upsert({
     where: { email: 'admin@demo.com' },
     update: {},
     create: {
-      clinicId: clinic.id,
+      facilityId: facility.id,
       name: 'Admin User',
       email: 'admin@demo.com',
       passwordHash: await bcrypt.hash('Demo1234!', 12),
@@ -29,7 +29,7 @@ async function main() {
     await prisma.queue.upsert({
       where: { id },
       update: {},
-      create: { id, clinicId: clinic.id, name, status: 'ACTIVE' },
+      create: { id, facilityId: facility.id, name, status: 'ACTIVE' },
     });
   }
 

@@ -20,12 +20,12 @@ export const PATCH = auth(async (req) => {
       return NextResponse.json({ success: false, message: msg }, { status: 400 });
     }
 
-    const clinic = await prisma.clinic.update({
-      where: { id: req.auth.user.clinicId },
+    const facility = await prisma.facility.update({
+      where: { id: req.auth.user.facilityId },
       data: { name: parsed.data.name },
     });
 
-    return NextResponse.json({ success: true, data: { id: clinic.id, name: clinic.name } });
+    return NextResponse.json({ success: true, data: { id: facility.id, name: facility.name } });
   } catch (err) {
     if (err instanceof UnauthorizedError) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });

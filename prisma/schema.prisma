@@ -28,7 +28,7 @@ enum QueueEventType {
   QUEUE_UPDATED
 }
 
-model Clinic {
+model Facility {
   id        String   @id @default(uuid())
   name      String
   logo      String?
@@ -42,36 +42,36 @@ model Clinic {
 
 model User {
   id           String   @id @default(uuid())
-  clinicId     String
+  facilityId   String
   name         String   @default("")
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
 
-  @@index([clinicId])
+  @@index([facilityId])
   @@index([email])
 }
 
 model Queue {
-  id        String      @id @default(uuid())
-  clinicId  String
-  name      String
+  id         String      @id @default(uuid())
+  facilityId String
+  name       String
   status    QueueStatus @default(ACTIVE)
   deletedAt DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  clinic   Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  entries  QueueEntry[]
-  events   QueueEvent[]
+  facility  Facility          @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  entries   QueueEntry[]
+  events    QueueEvent[]
   analytics AnalyticsRecord[]
 
-  @@unique([clinicId, name])
-  @@index([clinicId])
-  @@index([clinicId, status])
+  @@unique([facilityId, name])
+  @@index([facilityId])
+  @@index([facilityId, status])
   @@index([deletedAt])
 }
 
@@ -116,17 +116,17 @@ model QueueEvent {
 }
 
 model AnalyticsRecord {
-  id        String   @id @default(uuid())
-  clinicId  String
-  queueId   String
+  id         String   @id @default(uuid())
+  facilityId String
+  queueId    String
   date      DateTime
   metrics   Json
   deletedAt DateTime?
 
-  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
   queue  Queue  @relation(fields: [queueId], references: [id], onDelete: Cascade)
 
-  @@index([clinicId])
+  @@index([facilityId])
   @@index([queueId])
   @@index([date])
   @@index([deletedAt])

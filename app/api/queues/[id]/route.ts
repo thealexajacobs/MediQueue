@@ -21,7 +21,7 @@ export const PATCH = auth(async (
     const { id } = await params;
 
     const existing = await prisma.queue.findFirst({
-      where: { id, clinicId: req.auth.user.clinicId },
+      where: { id, facilityId: req.auth.user.facilityId },
     });
     if (!existing) throw new NotFoundError('Queue not found');
 
@@ -31,13 +31,13 @@ export const PATCH = auth(async (
     const restoreParsed = restoreSchema.safeParse(body);
     if (restoreParsed.success) {
       const queue = await prisma.queue.update({
-        where: { id, clinicId: req.auth.user.clinicId },
+        where: { id, facilityId: req.auth.user.facilityId },
         data: { deletedAt: null },
       });
 
       emitQueueEvent({
         type: QueueEventType.QUEUE_UPDATED,
-        clinicId: req.auth.user.clinicId,
+        facilityId: req.auth.user.facilityId,
         queueId: id,
       });
 
@@ -52,13 +52,13 @@ export const PATCH = auth(async (
     }
 
     const queue = await prisma.queue.update({
-      where: { id, clinicId: req.auth.user.clinicId },
+      where: { id, facilityId: req.auth.user.facilityId },
       data: parsed.data,
     });
 
     emitQueueEvent({
       type: QueueEventType.QUEUE_UPDATED,
-      clinicId: req.auth.user.clinicId,
+      facilityId: req.auth.user.facilityId,
       queueId: id,
     });
 
@@ -85,18 +85,18 @@ export const DELETE = auth(async (
     const { id } = await params;
 
     const existing = await prisma.queue.findFirst({
-      where: { id, clinicId: _req.auth.user.clinicId },
+      where: { id, facilityId: _req.auth.user.facilityId },
     });
     if (!existing) throw new NotFoundError('Queue not found');
 
     await prisma.queue.update({
-      where: { id, clinicId: _req.auth.user.clinicId },
+      where: { id, facilityId: _req.auth.user.facilityId },
       data: { deletedAt: new Date() },
     });
 
     emitQueueEvent({
       type: QueueEventType.QUEUE_UPDATED,
-      clinicId: _req.auth.user.clinicId,
+      facilityId: _req.auth.user.facilityId,
       queueId: id,
     });
 

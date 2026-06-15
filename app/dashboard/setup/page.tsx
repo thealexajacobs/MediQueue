@@ -8,7 +8,7 @@ export default async function SetupPage() {
   if (!session?.user) redirect('/login');
 
   const queueCount = await prisma.queue.count({
-    where: { clinicId: session.user.clinicId },
+    where: { facilityId: session.user.facilityId },
   });
 
   if (queueCount > 0) redirect('/dashboard');

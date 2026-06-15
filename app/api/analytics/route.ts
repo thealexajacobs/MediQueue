@@ -7,20 +7,20 @@ export const GET = auth(async (req) => {
   try {
     if (!req.auth?.user) throw new UnauthorizedError();
 
-    const clinicId = req.auth.user.clinicId;
+    const facilityId = req.auth.user.facilityId;
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const queues = await prisma.queue.findMany({
-      where: { clinicId },
+      where: { facilityId },
       select: { id: true, name: true },
       orderBy: { createdAt: 'asc' },
     });
 
     const todayEntries = await prisma.queueEntry.findMany({
       where: {
-        queue: { clinicId },
+        queue: { facilityId },
         createdAt: { gte: todayStart },
       },
       select: {
@@ -35,7 +35,7 @@ export const GET = auth(async (req) => {
 
     const allCompleted = await prisma.queueEntry.findMany({
       where: {
-        queue: { clinicId },
+        queue: { facilityId },
         status: 'COMPLETED',
       },
       select: {
