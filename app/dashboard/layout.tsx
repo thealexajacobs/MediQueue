@@ -1,9 +1,14 @@
 import { Providers } from '@/components/Providers';
+import { SessionProviderWrapper } from '@/components/SessionProviderWrapper';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <Providers>{children}</Providers>;
+  return (
+    <SessionProviderWrapper>
+      <Providers>{children}</Providers>
+    </SessionProviderWrapper>
+  );
 }

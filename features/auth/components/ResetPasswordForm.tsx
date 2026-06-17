@@ -2,11 +2,9 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Loader2, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
-import Link from 'next/link';
 
-function ResetForm() {
+function ResetFormInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -52,7 +50,9 @@ function ResetForm() {
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h1 className="text-xl font-bold text-foreground">Invalid reset link</h1>
         <p className="text-sm text-muted-foreground">This reset link is missing or invalid.</p>
-        <Link href="/login" className="text-sm font-medium text-primary underline underline-offset-2">Back to login</Link>
+        <button onClick={() => router.push('/auth')} className="text-sm font-medium text-primary underline underline-offset-2">
+          Back to login
+        </button>
       </div>
     );
   }
@@ -63,16 +63,23 @@ function ResetForm() {
         <CheckCircle2 className="h-12 w-12 text-emerald-500" />
         <h1 className="text-xl font-bold text-foreground">Password reset</h1>
         <p className="text-sm text-muted-foreground">Your password has been reset successfully.</p>
-        <Link href="/login" className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground">Sign in</Link>
+        <button
+          onClick={() => router.push('/auth')}
+          className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground"
+        >
+          Sign in
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full max-w-sm flex-col gap-6">
       <div className="text-center">
         <h1 className="text-xl font-bold text-foreground">Set new password</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Must be at least 8 characters with uppercase, lowercase, number, and special character.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Must be at least 8 characters with uppercase, lowercase, number, and special character.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -132,12 +139,10 @@ function ResetForm() {
   );
 }
 
-export default function ResetPasswordPage() {
+export function ResetPasswordForm() {
   return (
-    <AuthLayout>
-      <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
-        <ResetForm />
-      </Suspense>
-    </AuthLayout>
+    <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
+      <ResetFormInner />
+    </Suspense>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { DM_Sans, JetBrains_Mono } from 'next/font/google';
-import { SessionProviderWrapper } from '@/components/SessionProviderWrapper';
 import './globals.css';
 
 const dmSans = DM_Sans({
@@ -27,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable}`}>
-      <body suppressHydrationWarning><SessionProviderWrapper>{children}</SessionProviderWrapper></body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

@@ -1,14 +1,6 @@
-'use client';
-
-import { useState } from 'react';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 import Link from 'next/link';
-
-const NAV_ITEMS = [
-  { label: 'Features', href: '#features' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Analytics', href: '#analytics' },
-  { label: 'Contact', href: '#contact' },
-];
 
 export default function LandingPage() {
   return (
@@ -25,109 +17,33 @@ export default function LandingPage() {
   );
 }
 
-function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <header className="sticky top-0 z-50 border-b border-border/[0.07] bg-background/70 backdrop-blur-xl">
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm">
-            M
-          </div>
-          <span className="text-base font-semibold tracking-tight text-foreground">MediQueue</span>
-        </Link>
-
-        <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1">
-          {NAV_ITEMS.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="relative rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="flex shrink-0 items-center gap-3">
-          <Link
-            href="/login"
-            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/onboarding?fresh=1"
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
-          >
-            Get Started
-          </Link>
-
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground transition-colors hover:bg-muted md:hidden"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              {menuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              )}
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {menuOpen && (
-        <div className="border-t border-border/40 bg-background/95 backdrop-blur-lg md:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 pb-4 pt-2 sm:px-6">
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                {item.label}
-              </a>
-            ))}
-            <div className="my-1 h-px bg-border/40" />
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              Sign in
-            </Link>
-            <div className="my-1 h-px bg-border/40" />
-            <Link
-              href="/onboarding?fresh=1"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground"
-            >
-              Get Started
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-          </nav>
-        </div>
-      )}
-    </header>
-  );
-}
-
 function Hero() {
   return (
-    <section className="relative flex flex-col items-center overflow-hidden px-4 pb-16 pt-12 sm:pb-24 sm:pt-16">
+    <section className="relative flex flex-col items-center overflow-hidden px-4 pb-16 pt-20 sm:pb-24 sm:pt-28">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -left-40 -top-40 h-[600px] w-[600px] rounded-full bg-primary/[0.04] blur-[120px]" />
-        <div className="absolute -right-40 top-0 h-[500px] w-[500px] rounded-full bg-primary/[0.03] blur-[120px]" />
-        <div className="absolute bottom-0 left-1/2 h-[300px] w-[800px] -translate-x-1/2 bg-gradient-to-t from-primary/[0.03] to-transparent" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:32px_32px]" />
+        {/* Soft Ambient Gradient - main atmospheric glow */}
+        <div className="absolute left-1/2 top-[40%] h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[120px]" />
+
+        {/* Secondary ambient glows */}
+        <div className="absolute -left-40 top-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
+        <div className="absolute -right-40 bottom-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
+
+        {/* Queue Flow Lines - curved paths suggesting movement */}
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
+          <path d="M-100 350 C 200 250, 400 450, 600 350 S 900 250, 1200 350 S 1500 250, 1700 350" stroke="rgba(53,165,214,0.06)" strokeWidth="1.5" fill="none" />
+          <path d="M-100 500 C 300 400, 500 600, 700 500 S 1000 400, 1300 500 S 1600 400, 1800 500" stroke="rgba(53,165,214,0.04)" strokeWidth="0.75" fill="none" />
+          <path d="M-100 650 C 250 550, 450 750, 650 650 S 950 550, 1250 650 S 1550 550, 1750 650" stroke="rgba(53,165,214,0.04)" strokeWidth="0.75" fill="none" />
+        </svg>
+
+        {/* Dashboard Focus Halo - draws eye to center content */}
+        <div className="absolute left-1/2 top-[55%] h-[280px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[80px]" />
+
+        {/* Subtle Grid Overlay */}
+        <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent_47px,rgba(128,128,128,0.04)_47px,rgba(128,128,128,0.04)_48px),repeating-linear-gradient(90deg,transparent,transparent_47px,rgba(128,128,128,0.04)_47px,rgba(128,128,128,0.04)_48px)' }} />
+
+        {/* Bottom fade to background */}
+        <div className="absolute bottom-0 left-0 right-0 h-[120px] bg-gradient-to-t from-background to-transparent" />
       </div>
 
       <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
@@ -139,7 +55,7 @@ function Hero() {
           Real-Time Medical Facility Queue Management
         </div>
 
-        <h1 className="text-[clamp(2rem,_1.5rem_+_4vw,_4.75rem)] font-bold leading-[1.05] tracking-tight text-foreground">
+        <h1 className="text-[clamp(1.75rem,_1.25rem_+_3.5vw,_3.75rem)] font-bold leading-[1.05] tracking-tight text-foreground">
           Manage Patient Queues Without{' '}
           <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             the Waiting Room Chaos
@@ -153,7 +69,7 @@ function Hero() {
 
         <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:mt-10 sm:w-auto sm:flex-row">
           <Link
-            href="/onboarding?fresh=1"
+            href="/auth?mode=register"
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 sm:w-auto"
           >
             Start Free Trial
@@ -962,7 +878,7 @@ function CTA() {
           </p>
           <div className="mt-8 sm:mt-10">
             <Link
-              href="/onboarding?fresh=1"
+              href="/auth?mode=register"
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-10 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 sm:w-auto"
             >
               Start Free Trial
@@ -977,61 +893,4 @@ function CTA() {
   );
 }
 
-function Footer() {
-  return (
-    <footer id="contact" className="border-t border-border/20 bg-card/30">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="flex flex-col gap-10 sm:flex-row sm:justify-between sm:gap-12 lg:gap-16">
-          <div className="max-w-xs space-y-5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-                M
-              </div>
-              <span className="text-sm font-semibold text-foreground">MediQueue</span>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Real-time queue management for medical facilities. Replace your manual queue board with a live digital system.
-            </p>
-          </div>
 
-          <div className="flex flex-wrap gap-12 sm:gap-16 lg:gap-20">
-            <div className="space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Product</h4>
-              <ul className="space-y-3">
-                <li><a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a></li>
-                <li><a href="#how-it-works" className="text-sm text-muted-foreground transition-colors hover:text-foreground">How It Works</a></li>
-                <li><a href="#analytics" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Analytics</a></li>
-                <li><Link href="/onboarding?fresh=1" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Get Started</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Contact</h4>
-              <ul className="space-y-3">
-                <li><a href="mailto:hello@mediqueue.com" className="text-sm text-muted-foreground transition-colors hover:text-foreground">hello@mediqueue.com</a></li>
-                <li><span className="text-sm text-muted-foreground">Support: help@mediqueue.com</span></li>
-              </ul>
-            </div>
-
-            <div className="space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Legal</h4>
-              <ul className="space-y-3">
-                <li><span className="text-sm text-muted-foreground transition-colors hover:text-foreground cursor-pointer">Privacy Policy</span></li>
-                <li><span className="text-sm text-muted-foreground transition-colors hover:text-foreground cursor-pointer">Terms of Service</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/20 pt-6 sm:mt-12 sm:flex-row sm:pt-8">
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} MediQueue. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-muted-foreground">Built for medical facility reception teams</span>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-}

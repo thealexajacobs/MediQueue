@@ -5,33 +5,30 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@/features/auth/schemas/register';
+import { signIn } from 'next-auth/react';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
-    getValues,
+    watch,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     mode: 'onChange',
   });
 
-  function markCompleted(field: keyof RegisterInput) {
-    return () => {
-      if (getValues(field)?.toString().trim()) {
-        setCompleted((prev) => ({ ...prev, [field]: true }));
-      }
-    };
-  }
+  const clinicNameVal = watch('clinicName');
+  const emailVal = watch('email');
+  const passwordVal = watch('password');
+  const confirmPasswordVal = watch('confirmPassword');
 
   async function onSubmit(data: RegisterInput) {
     setIsLoading(true);
@@ -43,7 +40,6 @@ export function RegisterForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clinicName: data.clinicName,
-          name: data.name,
           email: data.email,
           password: data.password,
         }),
@@ -57,7 +53,18 @@ export function RegisterForm() {
         return;
       }
 
-      router.push('/login?registered=true');
+      const signInResult = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        router.push('/onboarding');
+        return;
+      }
+
+      router.push('/onboarding');
     } catch {
       setError('Something went wrong. Please try again.');
       setIsLoading(false);
@@ -68,34 +75,18 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-sm flex-col gap-4">
       <div>
         <label htmlFor="clinicName" className="mb-1 block text-sm text-muted-foreground">
-          Enter Clinic Name
+          Enter Facility Name
         </label>
         <input
           id="clinicName"
           type="text"
           autoFocus
           autoComplete="organization"
-          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${completed.clinicName ? 'bg-inverse-on-surface' : 'bg-card'}`}
-          {...register('clinicName', { onBlur: markCompleted('clinicName') })}
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${clinicNameVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          {...register('clinicName')}
         />
         {errors.clinicName && (
           <p className="mt-1 text-sm text-destructive">{errors.clinicName.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="name" className="mb-1 block text-sm text-muted-foreground">
-          Your Name
-        </label>
-        <input
-          id="name"
-          type="text"
-          autoComplete="name"
-          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${completed.name ? 'bg-inverse-on-surface' : 'bg-card'}`}
-          {...register('name', { onBlur: markCompleted('name') })}
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
         )}
       </div>
 
@@ -107,8 +98,8 @@ export function RegisterForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${completed.email ? 'bg-inverse-on-surface' : 'bg-card'}`}
-          {...register('email', { onBlur: markCompleted('email') })}
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${emailVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          {...register('email')}
         />
         {errors.email && (
           <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
@@ -124,16 +115,18 @@ export function RegisterForm() {
             id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
-            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${passwordVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
             {...register('password')}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+          {passwordVal ? (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </button>
+          ) : null}
         </div>
         {errors.password && (
           <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
@@ -149,16 +142,18 @@ export function RegisterForm() {
             id="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
             autoComplete="new-password"
-            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0"
+            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${confirmPasswordVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
             {...register('confirmPassword')}
           />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+          {confirmPasswordVal ? (
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showConfirmPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </button>
+          ) : null}
         </div>
         {errors.confirmPassword && (
           <p className="mt-1 text-sm text-destructive">{errors.confirmPassword.message}</p>

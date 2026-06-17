@@ -2,21 +2,16 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { AuthLayout } from '@/components/auth/AuthLayout';
-import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
+import dynamicNext from 'next/dynamic';
+
+const OnboardingFlow = dynamicNext(
+  () => import('@/components/onboarding/OnboardingFlow').then((m) => m.OnboardingFlow),
+  { loading: () => <div className="mx-auto h-96 w-full max-w-md animate-pulse rounded-sm bg-muted" /> }
+);
 
 export const dynamic = 'force-dynamic';
 
-export default async function OnboardingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ fresh?: string }>;
-}) {
-  const { fresh } = await searchParams;
-
-  if (fresh === '1') {
-    return <AuthLayout><OnboardingFlow /></AuthLayout>;
-  }
-
+export default async function OnboardingPage() {
   let session;
 
   try {
@@ -26,9 +21,7 @@ export default async function OnboardingPage({
     return <AuthLayout><OnboardingFlow /></AuthLayout>;
   }
 
-  if (!session?.user) {
-    return <AuthLayout><OnboardingFlow /></AuthLayout>;
-  }
+  if (!session?.user) return <AuthLayout><OnboardingFlow /></AuthLayout>;
 
   const queueCount = await prisma.queue.count({
     where: { facilityId: session.user.facilityId },
@@ -36,9 +29,5 @@ export default async function OnboardingPage({
 
   if (queueCount > 0) redirect('/dashboard');
 
-  return (
-    <AuthLayout>
-      <OnboardingFlow skipRegistration initialStep={2} />
-    </AuthLayout>
-  );
+  return <AuthLayout><OnboardingFlow /></AuthLayout>;
 }

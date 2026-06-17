@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import {
   X, Loader2, Pencil, Archive, Plus, Image,
-  Check, ChevronDown,
+  Check, ChevronDown, Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueues, useCreateQueue, useUpdateQueue, useDeleteQueue, useArchivedQueues, useRestoreQueue } from '@/features/queues/hooks/useQueueMutations';
 import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
 
 interface SettingsModalProps {
   open: boolean;
@@ -20,6 +23,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onClose, clinicName, clinicId, userName, userEmail }: SettingsModalProps) {
+  const router = useRouter();
   const { data: session, update: updateSession } = useSession();
   const { data: queues } = useQueues();
   const { data: archivedQueues } = useArchivedQueues();
@@ -37,6 +41,9 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [sendingReset, setSendingReset] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const [editingQueueId, setEditingQueueId] = useState<string | null>(null);
   const [editingQueueName, setEditingQueueName] = useState('');
@@ -173,6 +180,23 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
       toast.success('Queue restored');
     } catch {
       toast.error('Failed to restore queue');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeletingAccount(true);
+    try {
+      const res = await fetch('/api/auth/account', { method: 'DELETE' });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+      setShowDeleteConfirm(false);
+      onClose();
+      await signOut({ redirect: false });
+      router.push('/');
+    } catch {
+      toast.error('Failed to delete account');
+    } finally {
+      setDeletingAccount(false);
     }
   }
 
@@ -429,8 +453,58 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
                     We'll send you an email with a link to securely reset your password.
                   </p>
                 </div>
+
+                <div className="border-t border-border/10 pt-4">
+                  <label className="mb-1.5 block text-sm font-medium text-destructive">
+                    Danger Zone
+                  </label>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete Account
+                  </Button>
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    Permanently delete your account and all associated data. This action cannot be undone.
+                  </p>
+                </div>
               </div>
             </section>
+
+            <Dialog
+              open={showDeleteConfirm}
+              onClose={() => { if (!deletingAccount) setShowDeleteConfirm(false); }}
+              title="Delete Account"
+            >
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Are you sure you want to permanently delete your account? This will remove all your
+                  facility data, queues, and patient records. This action cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deletingAccount}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    isLoading={deletingAccount}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete Account
+                  </Button>
+                </div>
+              </div>
+            </Dialog>
 
             {/* ========== ARCHIVED ========== */}
             {archivedQueues && archivedQueues.length > 0 && (

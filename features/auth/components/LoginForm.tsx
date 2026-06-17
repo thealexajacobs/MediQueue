@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/features/auth/schemas/login';
@@ -77,9 +76,13 @@ export function LoginForm() {
           <label htmlFor="password" className="text-sm text-muted-foreground">
             Password
           </label>
-          <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+          <button
+            type="button"
+            onClick={() => router.push('/auth?mode=forgot-password')}
+            className="text-xs text-primary hover:underline"
+          >
             Forgot password?
-          </Link>
+          </button>
         </div>
         <div className="relative">
           <input
@@ -115,13 +118,6 @@ export function LoginForm() {
       >
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign in'}
       </button>
-
-      <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{' '}
-        <Link href="/onboarding?fresh=1" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-          Create one
-        </Link>
-      </p>
     </form>
   );
 }

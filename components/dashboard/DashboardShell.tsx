@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueues, useCreateQueue } from '@/features/queues/hooks/useQueueMutations';
 import { useQueueStore } from '@/features/queues/hooks/useQueueStore';
 import { useQueueEntries } from '@/features/queue-entries/hooks/useQueueEntries';
@@ -15,23 +16,26 @@ import { QueueProgress } from '@/components/dashboard/QueueProgress';
 import { LiveActivity } from '@/components/dashboard/LiveActivity';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { QueueHealthPanel } from '@/components/dashboard/QueueHealthPanel';
-import { AddPatientModal } from '@/components/dashboard/AddPatientModal';
+import dynamic from 'next/dynamic';
 import { SettingsModal } from '@/components/dashboard/SettingsModal';
 import { Dialog } from '@/components/ui/Dialog';
-import { Spinner } from '@/components/ui/Spinner';
 import { Plus, Loader2 } from 'lucide-react';
-import type { QueueDTO } from '@/types';
+
+const AddPatientModal = dynamic(
+  () => import('@/components/dashboard/AddPatientModal').then((m) => m.AddPatientModal),
+  { loading: () => null }
+);
 
 interface DashboardShellProps {
   clinicName?: string;
   clinicId?: string;
   userName?: string;
   userEmail?: string;
-  initialQueues?: QueueDTO[];
 }
 
-export function DashboardShell({ clinicName: propClinicName, clinicId, userName, userEmail, initialQueues }: DashboardShellProps) {
-  const { data: queues, isLoading: queuesLoading } = useQueues(initialQueues);
+export function DashboardShell({ clinicName: propClinicName, clinicId, userName, userEmail }: DashboardShellProps) {
+  const router = useRouter();
+  const { data: queues, isLoading: queuesLoading } = useQueues();
   const selectedQueueId = useQueueStore((s) => s.selectedQueueId);
   const setSelectedQueueId = useQueueStore((s) => s.setSelectedQueueId);
   const { data: entries, isLoading: entriesLoading } = useQueueEntries(selectedQueueId);
@@ -39,6 +43,7 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const stableEntriesRef = useRef(entries);
+  const stableQueueIdRef = useRef(selectedQueueId);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
   const { mutateAsync: createQueue, isPending: isCreatingQueue } = useCreateQueue();
@@ -58,10 +63,11 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
   useEffect(() => {
     if (entries && !entriesLoading) {
       stableEntriesRef.current = entries;
+      stableQueueIdRef.current = selectedQueueId;
     }
-  }, [entries, entriesLoading]);
+  }, [entries, entriesLoading, selectedQueueId]);
 
-  const displayEntries = entriesLoading && !entries ? (stableEntriesRef.current ?? []) : (entries ?? []);
+  const displayEntries = entriesLoading && !entries && stableQueueIdRef.current === selectedQueueId ? (stableEntriesRef.current ?? []) : (entries ?? []);
 
   const waitingEntries = useMemo(
     () =>
@@ -70,6 +76,17 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
         .sort((a, b) => a.position - b.position),
     [displayEntries],
   );
+
+  const completedEntries = useMemo(
+    () => displayEntries.filter((e) => e.status === 'COMPLETED'),
+    [displayEntries],
+  );
+
+  const avgWaitTime = useMemo(() => {
+    if (completedEntries.length === 0) return 0;
+    const totalMs = completedEntries.reduce((sum, e) => sum + (new Date(e.updatedAt).getTime() - new Date(e.createdAt).getTime()), 0);
+    return Math.round(totalMs / completedEntries.length / 60000);
+  }, [completedEntries]);
 
   const handleAddPatient = useCallback(() => setIsAddModalOpen(true), []);
   const handleCompleteAndCallNext = useCallback(async () => {
@@ -131,19 +148,16 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
     );
   }
 
-  if (!queues?.length) return null;
+  if (!queues?.length) {
+    router.replace('/onboarding');
+    return null;
+  }
 
   const currentQueue = queues.find((q) => q.id === selectedQueueId);
   const servingEntry = displayEntries.find((e) => e.status === 'SERVING') ?? null;
   const nextEntry = waitingEntries.length > 0 ? waitingEntries[0] : null;
   const servingCount = displayEntries.filter((e) => e.status === 'SERVING').length;
   const completedToday = displayEntries.filter((e) => e.status === 'COMPLETED').length;
-  const completedEntries = displayEntries.filter((e) => e.status === 'COMPLETED');
-  const avgWaitTime = useMemo(() => {
-    if (completedEntries.length === 0) return 0;
-    const totalMs = completedEntries.reduce((sum, e) => sum + (new Date(e.updatedAt).getTime() - new Date(e.createdAt).getTime()), 0);
-    return Math.round(totalMs / completedEntries.length / 60000);
-  }, [completedEntries]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background relative overflow-hidden">
@@ -179,9 +193,21 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:flex-row">
           <div className="min-w-0 flex-1 space-y-4 sm:space-y-6">
             {entriesLoading && !stableEntriesRef.current ? (
-              <div className="flex items-center justify-center py-24">
-                <Spinner label="Loading patients..." />
-              </div>
+              <>
+                <div className="flex flex-col gap-4 sm:gap-6">
+                  <div className="h-44 animate-pulse rounded-xl bg-muted sm:h-52" />
+                  <div className="grid grid-cols-4 gap-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-12 animate-pulse rounded-xl bg-muted" />
+                    ))}
+                  </div>
+                </div>
+              </>
             ) : (
               <>
                 <CurrentPatientHero

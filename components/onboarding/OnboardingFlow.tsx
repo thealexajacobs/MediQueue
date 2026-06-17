@@ -2,27 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Loader2, Building2, Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, ChevronRight, Users, Layers, Circle, CircleCheck, Eye, EyeOff } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { Loader2, ArrowRight, CheckCircle, Circle, CircleCheck, Layers, Users, ChevronRight } from 'lucide-react';
 
-const step1Schema = z.object({
-  facilityName: z.string().min(1, 'Facility name is required').max(100).trim(),
-  email: z.string().email('Enter a valid email address').trim(),
-  password: z.string().min(8, 'At least 8 characters'),
-});
-
-type Step1Data = z.infer<typeof step1Schema>;
-
-const STEP_LABELS = ['Workspace', 'Queue', 'Complete'];
+const STEP_LABELS = ['Queue', 'Complete'];
 
 const STEP_CONFIG = [
-  {
-    heading: 'Create your healthcare workspace',
-    supporting: 'Set up your workspace in minutes.',
-  },
   {
     heading: 'How would you like to manage your queues?',
     supporting: 'Pick the option that matches how your facility runs. You can change this later.',
@@ -33,18 +17,11 @@ const STEP_CONFIG = [
   },
 ];
 
-interface OnboardingFlowProps {
-  skipRegistration?: boolean;
-  initialStep?: number;
-}
-
-export function OnboardingFlow({ skipRegistration, initialStep = 1 }: OnboardingFlowProps) {
+export function OnboardingFlow() {
   const router = useRouter();
-  const [step, setStep] = useState(initialStep);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState(1);
   const [showDepartmentSelection, setShowDepartmentSelection] = useState(false);
   const [selectedOption, setSelectedOption] = useState<'single' | null>('single');
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([
@@ -52,57 +29,8 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
   ]);
   const [customDeptInput, setCustomDeptInput] = useState('');
 
-  const step1Form = useForm<Step1Data>({
-    resolver: zodResolver(step1Schema),
-    mode: 'onChange',
-  });
-
-  const totalSteps = 3;
+  const totalSteps = 2;
   const cfg = STEP_CONFIG[step - 1] ?? STEP_CONFIG[0];
-
-  async function handleStep1(data: Step1Data) {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clinicName: data.facilityName,
-          name: data.email.split('@')[0],
-          email: data.email,
-          password: data.password,
-        }),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.message || 'Registration failed');
-        setIsLoading(false);
-        return;
-      }
-
-      const signInResult = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      if (signInResult?.error) {
-        router.push('/login');
-        return;
-      }
-
-      setStep1Data(data);
-      setStep(2);
-      setIsLoading(false);
-    } catch {
-      setError('Something went wrong. Please try again.');
-      setIsLoading(false);
-    }
-  }
 
   async function handleCreateQueues(names: string[]) {
     setIsLoading(true);
@@ -117,7 +45,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
         });
       }
 
-      setStep(3);
+      setStep(2);
       setIsLoading(false);
     } catch {
       setError('Something went wrong. Please try again.');
@@ -142,7 +70,6 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
           <span className="text-xs font-medium text-muted-foreground">
             Step {step} of {totalSteps}
           </span>
-
         </div>
 
         <div className="flex gap-1">
@@ -164,20 +91,19 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
             );
           })}
         </div>
-
       </div>
 
       <div className="text-center">
-        {step === 3 && (
+        {step === 2 && (
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
             <CheckCircle className="h-7 w-7 text-emerald-600" />
           </div>
         )}
         <h2 className="text-xl font-bold leading-tight tracking-tight text-foreground">
-          {step === 2 && showDepartmentSelection ? 'Select your departments' : cfg.heading}
+          {step === 1 && showDepartmentSelection ? 'Select your departments' : cfg.heading}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {step === 2 && showDepartmentSelection
+          {step === 1 && showDepartmentSelection
             ? 'Choose the departments you want to create separate queues for.'
             : cfg.supporting}
         </p>
@@ -190,111 +116,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
           </div>
         )}
 
-        {step === 1 && !skipRegistration && (
-          <form onSubmit={step1Form.handleSubmit(handleStep1)} className="space-y-5">
-            <div>
-              <label htmlFor="facilityName" className="mb-1.5 block text-sm font-medium text-foreground">
-                Facility Name
-              </label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  id="facilityName"
-                  type="text"
-                  autoFocus
-                  autoComplete="organization"
-                  placeholder=" "
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 focus:bg-background [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
-
-                  {...step1Form.register('facilityName')}
-                />
-              </div>
-              {step1Form.formState.errors.facilityName ? (
-                <p className="mt-1 text-xs text-destructive">{step1Form.formState.errors.facilityName.message}</p>
-              ) : (
-                <p className="mt-1 text-xs text-muted-foreground">The name of your clinic, hospital, or pharmacy.</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
-                Work Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder=" "
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 focus:bg-background [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
-
-                  {...step1Form.register('email')}
-                />
-              </div>
-              {step1Form.formState.errors.email && (
-                <p className="mt-1 text-xs text-destructive">{step1Form.formState.errors.email.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder=" "
-                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 focus:bg-background [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
-
-                  {...step1Form.register('password')}
-                />
-                {step1Form.watch('password') && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  </button>
-                )}
-              </div>
-              {step1Form.formState.errors.password && (
-                <p className="mt-1 text-xs text-destructive">{step1Form.formState.errors.password.message}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading || !step1Form.formState.isValid}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  Create workspace
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {step === 1 && (
-          <p className="text-center text-xs text-muted-foreground mt-3">
-            Already have an account?{' '}
-            <a href="/login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-              Sign in
-            </a>
-          </p>
-        )}
-
-        {step === 2 && !showDepartmentSelection && (
+        {step === 1 && !showDepartmentSelection && (
           <div className="space-y-5">
             <button
               type="button"
@@ -393,18 +215,11 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   </>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="block w-full text-center text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-              >
-                Back
-              </button>
             </div>
           </div>
         )}
 
-        {step === 2 && showDepartmentSelection && (
+        {step === 1 && showDepartmentSelection && (
           <div className="space-y-5">
             <div className="flex gap-2">
               <input
@@ -423,7 +238,6 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
                   }
                 }}
                 className="h-10 flex-1 rounded-lg border border-input bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary/20 [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
-
               />
               <button
                 type="button"
@@ -496,7 +310,7 @@ export function OnboardingFlow({ skipRegistration, initialStep = 1 }: Onboarding
           </div>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <div className="flex flex-col items-center gap-6 py-4">
             <button
               onClick={() => router.push('/dashboard')}
