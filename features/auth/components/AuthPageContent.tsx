@@ -1,30 +1,12 @@
 'use client';
 
-import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
+import { LoginForm } from '@/features/auth/components/LoginForm';
+import { RegisterForm } from '@/features/auth/components/RegisterForm';
+import { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm';
+import { ResetPasswordForm } from '@/features/auth/components/ResetPasswordForm';
 
-const LoginForm = dynamic(
-  () => import('@/features/auth/components/LoginForm').then((m) => m.LoginForm),
-  { loading: () => <div className="mx-auto h-64 w-full max-w-sm animate-pulse rounded-sm bg-muted" /> }
-);
-
-const RegisterForm = dynamic(
-  () => import('@/features/auth/components/RegisterForm').then((m) => m.RegisterForm),
-  { loading: () => <div className="mx-auto h-80 w-full max-w-sm animate-pulse rounded-sm bg-muted" /> }
-);
-
-const ForgotPasswordForm = dynamic(
-  () => import('@/features/auth/components/ForgotPasswordForm').then((m) => m.ForgotPasswordForm),
-  { loading: () => <div className="mx-auto h-48 w-full max-w-sm animate-pulse rounded-sm bg-muted" /> }
-);
-
-const ResetPasswordForm = dynamic(
-  () => import('@/features/auth/components/ResetPasswordForm').then((m) => m.ResetPasswordForm),
-  { loading: () => <div className="mx-auto h-64 w-full max-w-sm animate-pulse rounded-sm bg-muted" /> }
-);
-
-function AuthContent() {
+export function AuthPageContent() {
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') || 'login';
 
@@ -65,13 +47,5 @@ function AuthContent() {
       {mode === 'forgot-password' && <ForgotPasswordForm />}
       {mode === 'reset-password' && <ResetPasswordForm />}
     </div>
-  );
-}
-
-export function AuthPageContent() {
-  return (
-    <Suspense fallback={<div className="mx-auto h-64 w-full max-w-sm animate-pulse rounded-sm bg-muted" />}>
-      <AuthContent />
-    </Suspense>
   );
 }
