@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     sendEmail({
       to: email,
       subject: 'Welcome to MediQueue',
-      html: `<p>Hi ${name || 'there'},</p><p>Welcome to MediQueue! Your account for <strong>${clinicName}</strong> has been created successfully.</p><p>You can now sign in to start managing your queues.</p><p><a href="${env.AUTH_URL}/login" style="display:inline-block;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:6px;margin-top:8px">Sign in to MediQueue</a></p>`,
+      html: `<p>Hi ${name || 'there'},</p><p>Welcome to MediQueue! Your account for <strong>${clinicName}</strong> has been created successfully.</p><p>You can now sign in to start managing your queues.</p><p><a href="${env.AUTH_URL}/auth" style="display:inline-block;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:6px;margin-top:8px">Sign in to MediQueue</a></p>`,
     }).catch((err) => console.error('[register] email send failed (non-blocking):', err));
 
     return NextResponse.json(

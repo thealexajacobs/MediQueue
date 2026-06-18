@@ -80,7 +80,7 @@ export function TopBar({ clinicName, clinicLogo, hideExtras, onSettingsClick }: 
                     onClick={async () => {
                       setShowProfile(false);
                       await signOut({ redirect: false });
-                      router.push('/login');
+                      router.push('/auth');
                     }}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                   >

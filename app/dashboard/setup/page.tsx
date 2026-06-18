@@ -5,7 +5,7 @@ import { SetupForm } from '@/features/queues/components/SetupForm';
 
 export default async function SetupPage() {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect('/auth');
 
   const queueCount = await prisma.queue.count({
     where: { facilityId: session.user.facilityId },

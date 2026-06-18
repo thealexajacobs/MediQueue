@@ -4,7 +4,7 @@ import { AnalyticsDashboard } from '@/features/analytics/components/AnalyticsDas
 
 export default async function AnalyticsPage() {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect('/auth');
 
   return <AnalyticsDashboard />;
 }
