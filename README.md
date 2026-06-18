@@ -1,6 +1,6 @@
 # MediQueue
 
-Real-time, multi-tenant SaaS clinic queue management system.
+> Real-time, multi-tenant SaaS medical facility queue management system.
 
 Built with Next.js 15, PostgreSQL, Prisma, Socket.IO, and Tailwind CSS.
 

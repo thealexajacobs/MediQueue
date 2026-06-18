@@ -8,7 +8,7 @@
 
 ## Product Summary
 
-MediQueue is a real-time clinic queue management system that helps healthcare facilities manage walk-in patient flow while providing patients with live queue visibility through QR codes and unique tracking links.
+MediQueue is a real-time medical facility queue management system that helps healthcare facilities manage walk-in patient flow while providing patients with live queue visibility through QR codes and unique tracking links.
 
 The product is designed as an operational tool, not an administration platform.
 
