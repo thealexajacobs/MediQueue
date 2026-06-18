@@ -148,7 +148,7 @@ export function OnboardingFlow() {
                     One queue for all patients.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {['Small clinics', 'Pharmacies', 'Independent practices'].map((tag) => (
+                    {['Small facilities', 'Pharmacies', 'Independent practices'].map((tag) => (
                       <span
                         key={tag}
                         className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
@@ -185,7 +185,7 @@ export function OnboardingFlow() {
                     Separate queues for each department.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {['Hospitals', 'Multi-specialty clinics', 'Diagnostic centers'].map((tag) => (
+                    {['Hospitals', 'Multi-specialty centers', 'Diagnostic centers'].map((tag) => (
                       <span
                         key={tag}
                         className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"

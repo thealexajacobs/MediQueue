@@ -18,7 +18,7 @@ export default async function SetupPage() {
       <div className="mb-8 max-w-md">
         <h1 className="text-3xl font-bold text-foreground">Welcome to MediQueue</h1>
         <p className="mt-3 text-muted-foreground">
-          Your clinic is all set up. Create your first queue to start managing patients.
+          Your facility is all set up. Create your first queue to start managing patients.
         </p>
       </div>
 

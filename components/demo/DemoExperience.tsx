@@ -425,7 +425,7 @@ export function DemoExperience() {
                 Ready to Modernize Your Facility Queue Experience?
               </h2>
               <p className="mt-4 text-sm text-muted-foreground sm:text-base sm:text-lg">
-                Get started free. No credit card required. Your clinic will be live in under a minute.
+                Get started free. No credit card required. Your medical facility will be live in under a minute.
               </p>
               <div className="mt-8 sm:mt-10">
                 <Link
