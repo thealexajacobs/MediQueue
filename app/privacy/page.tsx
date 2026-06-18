@@ -22,15 +22,17 @@ export default function PrivacyPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1">
-        <Hero />
-        <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24 lg:pb-32">
+        <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <Link
             href="/dashboard"
-            className="mb-6 flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
+        </div>
+        <Hero />
+        <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24 lg:pb-32">
           <div className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-12 xl:gap-16">
             <nav className="hidden lg:block">
               <div className="sticky top-24 space-y-1">
