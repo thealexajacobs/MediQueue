@@ -18,7 +18,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SOCKET_URL: z.string().url().default('http://localhost:3001'),
   },
   runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
+    DATABASE_URL: process.env.DATABASE_URL ?? process.env.POSTGRES_PRISMA_URL,
     JWT_SECRET: process.env.JWT_SECRET,
     AUTH_URL: process.env.AUTH_URL,
     AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
