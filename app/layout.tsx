@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'MediQueue — Clinic Queue Management',
-  description: 'Real-time multi-tenant clinic queue management system',
+  title: 'MediQueue — Medical Facility Queue Management',
+  description: 'Real-time medical facility queue management system',
 };
 
 export default function RootLayout({
