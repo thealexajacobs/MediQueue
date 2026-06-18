@@ -6,6 +6,7 @@ import { getNextPosition, getNextQueueNumber } from '@/lib/queue';
 import { UnauthorizedError } from '@/lib/errors';
 import { emitQueueEvent } from '@/lib/websocket';
 import { QueueEventType } from '@/types';
+import { env } from '@/lib/env';
 
 export const GET = auth(async (req) => {
   try {
@@ -90,7 +91,7 @@ export const POST = auth(async (req) => {
       entryId: entry.id,
     });
 
-    const baseUrl = process.env.AUTH_URL || 'http://localhost:3000';
+    const baseUrl = env.AUTH_URL;
 
     return NextResponse.json(
       {

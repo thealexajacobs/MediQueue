@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 import { createHmac } from 'crypto';
 import { z } from 'zod';
+import { env } from '@/lib/env';
 
 const forgotSchema = z.object({
   email: z.string().email().trim(),
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     });
 
     const token = createResetToken(email);
-    const resetUrl = `${process.env.AUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+    const resetUrl = `${env.AUTH_URL}/auth?mode=reset-password&token=${token}`;
 
     if (user) {
       await sendEmail({
