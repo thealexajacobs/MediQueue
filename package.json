@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "postinstall": "patch-package && node scripts/patch-next-react-dom.mjs"
+    "postinstall": "patch-package && node scripts/patch-next-react-dom.mjs && prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
