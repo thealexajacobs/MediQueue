@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Settings, LogOut, ChevronDown, BarChart3 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 
@@ -14,7 +13,6 @@ interface TopBarProps {
 }
 
 export function TopBar({ clinicName, clinicLogo, hideExtras, onSettingsClick }: TopBarProps) {
-  const router = useRouter();
   const [showProfile, setShowProfile] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -79,8 +77,7 @@ export function TopBar({ clinicName, clinicLogo, hideExtras, onSettingsClick }: 
                   <button
                     onClick={async () => {
                       setShowProfile(false);
-                      await signOut({ redirect: false });
-                      router.push('/auth');
+                      await signOut({ callbackUrl: '/auth' });
                     }}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                   >
