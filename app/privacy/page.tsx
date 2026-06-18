@@ -22,13 +22,13 @@ export default function PrivacyPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 pt-3 sm:px-6">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            Back<span className="hidden sm:inline"> to Dashboard</span>
           </Link>
         </div>
         <Hero />
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
 }
 function Hero() {
   return (
-    <section className="relative overflow-hidden px-4 pb-8 pt-16 sm:pb-12 sm:pt-20 lg:pt-24">
+    <section className="relative overflow-hidden px-4 pb-8 pt-8 sm:pb-12 sm:pt-12 lg:pt-16">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -left-40 -top-40 h-[600px] w-[600px] rounded-full bg-primary/[0.04] blur-[120px]" />
         <div className="absolute -right-40 top-0 h-[500px] w-[500px] rounded-full bg-primary/[0.03] blur-[120px]" />
