@@ -51,7 +51,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground transition-colors hover:bg-muted md:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground/50 transition-colors hover:bg-muted hover:text-muted-foreground md:hidden"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
