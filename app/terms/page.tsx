@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import { TermsMobileToC } from '@/components/landing/MobileToC';
@@ -26,6 +26,13 @@ export default function TermsPage() {
       <main className="flex-1">
         <Hero />
         <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24 lg:pb-32">
+          <Link
+            href="/dashboard"
+            className="mb-6 flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
           <div className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-12 xl:gap-16">
             <nav className="hidden lg:block">
               <div className="sticky top-24 space-y-1">

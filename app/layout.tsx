@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DM_Sans, JetBrains_Mono } from 'next/font/google';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import './globals.css';
 
 const dmSans = DM_Sans({
@@ -25,8 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable}`}>
-      <body suppressHydrationWarning>{children}</body>
+    <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{
+          __html: `!function(){try{var e=localStorage.getItem("theme");if(!e||"system"===e){e=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}"dark"===e?(document.documentElement.dataset.theme="dark",document.documentElement.classList.add("dark")):(document.documentElement.dataset.theme="light",document.documentElement.classList.remove("dark"))}catch(e){}}()`,
+        }} />
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

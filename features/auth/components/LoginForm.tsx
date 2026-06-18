@@ -23,6 +23,8 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
+  const emailValue = watch('email', '');
+  const hasEmail = !!emailValue;
   const passwordValue = watch('password', '');
   const hasPassword = !!passwordValue;
 
@@ -61,7 +63,7 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           placeholder=" "
-          className="h-11 w-full rounded-sm border border-input bg-card px-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary focus:bg-card [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary focus:bg-card ${hasEmail ? 'bg-inverse-on-surface' : 'bg-card'}`}
 
           onFocus={clearError}
           {...register('email')}
@@ -90,7 +92,7 @@ export function LoginForm() {
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             placeholder=" "
-            className="h-11 w-full rounded-sm border border-input bg-card pr-10 pl-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary focus:bg-card [&:not(:placeholder-shown):not(:focus)]:bg-muted/85"
+            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-primary focus:bg-card ${hasPassword ? 'bg-inverse-on-surface' : 'bg-card'}`}
 
             onFocus={clearError}
             {...register('password')}

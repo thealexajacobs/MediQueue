@@ -23,27 +23,29 @@ function Hero() {
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         {/* Soft Ambient Gradient - main atmospheric glow */}
-        <div className="absolute left-1/2 top-[40%] h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[120px]" />
+        <div className="absolute left-1/2 top-[35%] h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[140px]" />
+        <div className="absolute left-1/2 top-[55%] h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(var(--color-primary-container)/0.06)] blur-[100px]" />
 
-        {/* Secondary ambient glows */}
-        <div className="absolute -left-40 top-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
-        <div className="absolute -right-40 bottom-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
-
-        {/* Queue Flow Lines - curved paths suggesting movement */}
+        {/* Elegant Queue Flow Lines - curved paths suggesting movement */}
         <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
-          <path d="M-100 350 C 200 250, 400 450, 600 350 S 900 250, 1200 350 S 1500 250, 1700 350" stroke="rgba(53,165,214,0.06)" strokeWidth="1.5" fill="none" />
-          <path d="M-100 500 C 300 400, 500 600, 700 500 S 1000 400, 1300 500 S 1600 400, 1800 500" stroke="rgba(53,165,214,0.04)" strokeWidth="0.75" fill="none" />
-          <path d="M-100 650 C 250 550, 450 750, 650 650 S 950 550, 1250 650 S 1550 550, 1750 650" stroke="rgba(53,165,214,0.04)" strokeWidth="0.75" fill="none" />
+          <path d="M-80 250 Q 200 150, 360 280 T 640 300 T 920 260 T 1200 320 T 1520 280" stroke="hsl(var(--primary)/0.07)" strokeWidth="1" fill="none" />
+          <path d="M-80 420 Q 250 320, 420 450 T 700 470 T 980 430 T 1260 490 T 1520 450" stroke="hsl(var(--primary)/0.05)" strokeWidth="0.75" fill="none" />
+          <path d="M-80 580 Q 300 480, 480 610 T 760 630 T 1040 590 T 1320 650 T 1520 610" stroke="hsl(var(--primary)/0.04)" strokeWidth="0.5" fill="none" />
+          <path d="M-80 720 Q 350 620, 530 750 T 810 770 T 1090 730 T 1370 790 T 1520 750" stroke="hsl(var(--primary)/0.03)" strokeWidth="0.5" fill="none" />
         </svg>
 
-        {/* Dashboard Focus Halo - draws eye to center content */}
-        <div className="absolute left-1/2 top-[55%] h-[280px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[80px]" />
+        {/* Soft Glow Elements behind dashboard area */}
+        <div className="absolute left-1/2 top-[55%] h-[350px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(var(--color-primary-container)/0.05)] blur-[100px]" />
+        <div className="absolute left-[55%] top-[58%] h-[200px] w-[200px] rounded-full bg-[hsl(var(--color-secondary-container)/0.04)] blur-[80px]" />
+
+        {/* Dashboard Focus Halo - draws eye to product preview */}
+        <div className="absolute left-1/2 top-[56%] h-[240px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/6 blur-[90px]" />
 
         {/* Subtle Grid Overlay */}
-        <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent_47px,rgba(128,128,128,0.04)_47px,rgba(128,128,128,0.04)_48px),repeating-linear-gradient(90deg,transparent,transparent_47px,rgba(128,128,128,0.04)_47px,rgba(128,128,128,0.04)_48px)' }} />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'linear-gradient(hsl(var(--muted-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--muted-foreground)) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
 
         {/* Bottom fade to background */}
-        <div className="absolute bottom-0 left-0 right-0 h-[120px] bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[160px] bg-gradient-to-t from-background via-background/80 to-transparent" />
       </div>
 
       <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
@@ -72,18 +74,21 @@ function Hero() {
             href="/auth?mode=register"
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 sm:w-auto"
           >
-            Start Free Trial
+            Get Started
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </Link>
-          <button className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-border/40 bg-card/50 px-8 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted sm:w-auto">
+          <Link
+            href="/demo"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-border/40 bg-card/50 px-8 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted sm:w-auto"
+          >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             View Demo
-          </button>
+          </Link>
         </div>
       </div>
     </section>
@@ -185,8 +190,8 @@ function DashboardShowcaseMockup() {
           ))}
         </div>
 
-        {/* Action Bar - 2x2 grid for compactness */}
-        <div className="grid grid-cols-4 gap-2">
+        {/* Action Bar */}
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2">
           {[
             { label: 'Add Patient', primary: false },
             { label: 'Call Next', primary: true },
@@ -195,9 +200,9 @@ function DashboardShowcaseMockup() {
           ].map((action) => (
             <div
               key={action.label}
-              className={`flex flex-col items-center justify-center gap-1 rounded-lg px-1.5 py-2 text-[8px] font-semibold sm:gap-1.5 sm:rounded-xl sm:py-3 sm:text-[10px] ${
+              className={`flex flex-row items-center justify-center gap-2 rounded-lg px-3 py-3 text-[10px] font-semibold sm:flex-col sm:justify-center sm:gap-1.5 sm:rounded-xl sm:py-3 sm:text-[10px] ${
                 action.primary
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-sm col-span-2 sm:col-span-1'
                   : 'border border-border/30 bg-card text-muted-foreground'
               }`}
             >
@@ -881,7 +886,7 @@ function CTA() {
               href="/auth?mode=register"
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-10 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 sm:w-auto"
             >
-              Start Free Trial
+              Get Started
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>

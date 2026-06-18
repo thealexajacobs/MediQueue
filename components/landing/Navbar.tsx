@@ -44,7 +44,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/auth?mode=register"
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
+            className="hidden md:inline-flex h-9 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
           >
             Get Started
           </Link>
@@ -66,7 +66,7 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="border-t border-border/40 bg-background/95 backdrop-blur-lg md:hidden">
+        <div className="absolute left-0 right-0 top-full border-t border-border/40 bg-background md:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 pb-4 pt-2 sm:px-6">
             {NAV_ITEMS.map((item) => (
               <a

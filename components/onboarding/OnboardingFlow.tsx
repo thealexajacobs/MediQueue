@@ -65,33 +65,35 @@ export function OnboardingFlow() {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground">
-            Step {step} of {totalSteps}
-          </span>
-        </div>
+      {step === 1 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">
+              Step {step} of {totalSteps}
+            </span>
+          </div>
 
-        <div className="flex gap-1">
-          {Array.from({ length: totalSteps }).map((_, i) => {
-            const idx = i + 1;
-            const isComplete = idx < step;
-            const isCurrent = idx === step;
-            return (
-              <div
-                key={idx}
-                className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-                  isComplete
-                    ? 'bg-primary'
-                    : isCurrent
-                      ? 'bg-primary/60'
-                      : 'bg-muted'
-                }`}
-              />
-            );
-          })}
+          <div className="flex gap-1">
+            {Array.from({ length: totalSteps }).map((_, i) => {
+              const idx = i + 1;
+              const isComplete = idx < step;
+              const isCurrent = idx === step;
+              return (
+                <div
+                  key={idx}
+                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                    isComplete
+                      ? 'bg-primary'
+                      : isCurrent
+                        ? 'bg-primary/60'
+                        : 'bg-muted'
+                  }`}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="text-center">
         {step === 2 && (

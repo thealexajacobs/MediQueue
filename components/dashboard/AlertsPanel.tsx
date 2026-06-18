@@ -12,28 +12,28 @@ interface Alert {
 
 const STYLES: Record<string, { border: string; bg: string; text: string; icon: React.ReactNode }> = {
   warning: {
-    border: 'border-amber-200',
-    bg: 'bg-amber-50',
-    text: 'text-amber-800',
-    icon: <AlertTriangle className="h-4 w-4 text-amber-600" />,
+    border: 'border-amber-200 dark:border-amber-800',
+    bg: 'bg-amber-50 dark:bg-amber-950/50',
+    text: 'text-amber-800 dark:text-amber-200',
+    icon: <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />,
   },
   info: {
-    border: 'border-sky-200',
-    bg: 'bg-sky-50',
-    text: 'text-sky-800',
-    icon: <Info className="h-4 w-4 text-sky-600" />,
+    border: 'border-sky-200 dark:border-sky-800',
+    bg: 'bg-sky-50 dark:bg-sky-950/50',
+    text: 'text-sky-800 dark:text-sky-200',
+    icon: <Info className="h-4 w-4 text-sky-600 dark:text-sky-400" />,
   },
   success: {
-    border: 'border-emerald-200',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-800',
-    icon: <CheckCircle2 className="h-4 w-4 text-emerald-600" />,
+    border: 'border-emerald-200 dark:border-emerald-800',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
+    text: 'text-emerald-800 dark:text-emerald-200',
+    icon: <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />,
   },
   error: {
-    border: 'border-red-200',
-    bg: 'bg-red-50',
-    text: 'text-red-800',
-    icon: <AlertTriangle className="h-4 w-4 text-red-600" />,
+    border: 'border-red-200 dark:border-red-800',
+    bg: 'bg-red-50 dark:bg-red-950/50',
+    text: 'text-red-800 dark:text-red-200',
+    icon: <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />,
   },
 };
 

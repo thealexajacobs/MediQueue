@@ -3,27 +3,31 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { signOut } from 'next-auth/react';
 import {
   X, Loader2, Pencil, Archive, Plus, Image,
-  Check, ChevronDown, Trash2,
+  Check, ChevronDown, Trash2, Sun, Moon, Monitor,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueues, useCreateQueue, useUpdateQueue, useDeleteQueue, useArchivedQueues, useRestoreQueue } from '@/features/queues/hooks/useQueueMutations';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
   clinicName?: string;
+  clinicLogo?: string | null;
   clinicId?: string;
   userName?: string;
   userEmail?: string;
 }
 
-export function SettingsModal({ open, onClose, clinicName, clinicId, userName, userEmail }: SettingsModalProps) {
+export function SettingsModal({ open, onClose, clinicName, clinicLogo, clinicId, userName, userEmail }: SettingsModalProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: session, update: updateSession } = useSession();
   const { data: queues } = useQueues();
   const { data: archivedQueues } = useArchivedQueues();
@@ -34,11 +38,8 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
 
   const [facilityName, setFacilityName] = useState(clinicName ?? '');
   const [facilityDirty, setFacilityDirty] = useState(false);
+  const [logoDirty, setLogoDirty] = useState(false);
   const [savingFacility, setSavingFacility] = useState(false);
-
-  const [displayName, setDisplayName] = useState(clinicName ?? '');
-  const [profileDirty, setProfileDirty] = useState(false);
-  const [savingProfile, setSavingProfile] = useState(false);
 
   const [sendingReset, setSendingReset] = useState(false);
 
@@ -54,14 +55,14 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
+  const { theme, setTheme } = useTheme();
+
   const addQueueInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setFacilityName(clinicName ?? '');
-      setDisplayName(clinicName ?? '');
       setFacilityDirty(false);
-      setProfileDirty(false);
       setSendingReset(false);
       setShowAddQueue(false);
       setNewQueueName('');
@@ -79,40 +80,24 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
     if (!facilityName.trim()) return;
     setSavingFacility(true);
     try {
+      const body: Record<string, string> = {};
+      if (facilityDirty) body.name = facilityName.trim();
+      if (logoDirty && logoPreview) body.logo = logoPreview;
       const res = await fetch('/api/clinics', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: facilityName.trim() }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
       setFacilityDirty(false);
-      toast.success('Facility name updated');
+      setLogoDirty(false);
+      queryClient.invalidateQueries({ queryKey: ['facility', clinicId] });
+      toast.success('Changes saved');
     } catch {
-      toast.error('Failed to update facility name');
+      toast.error('Failed to save changes');
     } finally {
       setSavingFacility(false);
-    }
-  }
-
-  async function handleSaveProfile() {
-    if (!displayName.trim()) return;
-    setSavingProfile(true);
-    try {
-      const res = await fetch('/api/auth/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: displayName.trim() }),
-      });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.message);
-      setProfileDirty(false);
-      await updateSession({ name: displayName.trim() });
-      toast.success('Profile updated');
-    } catch {
-      toast.error('Failed to update profile');
-    } finally {
-      setSavingProfile(false);
     }
   }
 
@@ -204,7 +189,7 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setLogoPreview(reader.result as string);
+    reader.onload = () => { setLogoPreview(reader.result as string); setLogoDirty(true); };
     reader.readAsDataURL(file);
   }
 
@@ -229,39 +214,16 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="space-y-8">
+          <div className="space-y-12">
 
-            {/* ========== FACILITY ========== */}
+            {/* ========== FACILITY & ACCOUNT ========== */}
             <section>
-              <h3 className="text-sm font-semibold text-foreground">Facility</h3>
+              <h3 className="text-sm font-semibold text-foreground">Facility Information</h3>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Basic facility identity information used throughout the system.
+                Manage your facility identity and personal account settings.
               </p>
 
               <div className="mt-4 space-y-4">
-                <div>
-                  <label htmlFor="facility-name" className="mb-1.5 block text-sm font-medium text-foreground">
-                    Facility Name
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      id="facility-name"
-                      type="text"
-                      value={facilityName}
-                      onChange={(e) => { setFacilityName(e.target.value); setFacilityDirty(true); }}
-                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleSaveFacility}
-                      disabled={!facilityDirty || !facilityName.trim() || savingFacility}
-                      isLoading={savingFacility}
-                    >
-                      Save
-                    </Button>
-                  </div>
-                </div>
-
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-foreground">
                     Facility Logo <span className="text-muted-foreground font-normal">(optional)</span>
@@ -270,6 +232,8 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-muted/30">
                       {logoPreview ? (
                         <img src={logoPreview} alt="Logo preview" className="h-full w-full object-cover" />
+                      ) : clinicLogo ? (
+                        <img src={clinicLogo} alt="Facility logo" className="h-full w-full object-cover" />
                       ) : (
                         <Image className="h-5 w-5 text-muted-foreground" />
                       )}
@@ -281,11 +245,61 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
                     </label>
                   </div>
                 </div>
+
+                <div>
+                  <label htmlFor="facility-name" className="mb-1.5 block text-sm font-medium text-foreground">
+                    Facility Name
+                  </label>
+                  <input
+                    id="facility-name"
+                    type="text"
+                    value={facilityName}
+                    onChange={(e) => { setFacilityName(e.target.value); setFacilityDirty(true); }}
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">
+                    Email Address
+                  </label>
+                  <div className="flex h-10 items-center rounded-lg border border-border/30 bg-muted/20 px-3 text-sm text-muted-foreground">
+                    {userEmail ?? session?.user?.email ?? '—'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">
+                    Password
+                  </label>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSendResetLink}
+                    disabled={sendingReset}
+                    isLoading={sendingReset}
+                  >
+                    Send Reset Link
+                  </Button>
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    We'll send you an email with a link to securely reset your password.
+                  </p>
+                </div>
+
+                <div className="border-t border-border/20 pt-4">
+                  <Button
+                    onClick={handleSaveFacility}
+                    disabled={(!facilityDirty && !logoDirty) || !facilityName.trim() || savingFacility}
+                    isLoading={savingFacility}
+                    className="w-full"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
               </div>
             </section>
 
-            {/* Divider */}
-            <div className="border-t border-border/10" />
+            <div className="border-t border-border/30" />
 
             {/* ========== QUEUES ========== */}
             <section>
@@ -393,87 +407,6 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
               </div>
             </section>
 
-            {/* Divider */}
-            <div className="border-t border-border/10" />
-
-            {/* ========== ACCOUNT ========== */}
-            <section>
-              <h3 className="text-sm font-semibold text-foreground">Account</h3>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Manage your personal account settings.
-              </p>
-
-              <div className="mt-4 space-y-4">
-                <div>
-                  <label htmlFor="display-name" className="mb-1.5 block text-sm font-medium text-foreground">
-                    Facility Name
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      id="display-name"
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => { setDisplayName(e.target.value); setProfileDirty(true); }}
-                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleSaveProfile}
-                      disabled={!profileDirty || !displayName.trim() || savingProfile}
-                      isLoading={savingProfile}
-                    >
-                      Save
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground">
-                    Email Address
-                  </label>
-                  <div className="flex h-10 items-center rounded-lg border border-border/30 bg-muted/20 px-3 text-sm text-muted-foreground">
-                    {userEmail ?? session?.user?.email ?? '—'}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground">
-                    Password
-                  </label>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleSendResetLink}
-                    disabled={sendingReset}
-                    isLoading={sendingReset}
-                  >
-                    Send Reset Link
-                  </Button>
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    We'll send you an email with a link to securely reset your password.
-                  </p>
-                </div>
-
-                <div className="border-t border-border/10 pt-4">
-                  <label className="mb-1.5 block text-sm font-medium text-destructive">
-                    Danger Zone
-                  </label>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="border-destructive/30 text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete Account
-                  </Button>
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    Permanently delete your account and all associated data. This action cannot be undone.
-                  </p>
-                </div>
-              </div>
-            </section>
-
             <Dialog
               open={showDeleteConfirm}
               onClose={() => { if (!deletingAccount) setShowDeleteConfirm(false); }}
@@ -506,38 +439,85 @@ export function SettingsModal({ open, onClose, clinicName, clinicId, userName, u
               </div>
             </Dialog>
 
-            {/* ========== ARCHIVED ========== */}
-            {archivedQueues && archivedQueues.length > 0 && (
-              <>
-                <div className="border-t border-border/10" />
-                <section>
-                  <h3 className="text-sm font-semibold text-foreground">Archived</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Archived departments can be restored at any time.
-                  </p>
+            {/* ========== APPEARANCE ========== */}
+            <div className="border-t border-border/30" />
+            <section>
+              <h3 className="text-sm font-semibold text-foreground">Appearance</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Choose your preferred theme.
+              </p>
+              <div className="mt-4 flex gap-2">
+                {([['light', Sun, 'Light'], ['dark', Moon, 'Dark'], ['system', Monitor, 'System']] as const).map(([value, Icon, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setTheme(value)}
+                    className={`flex flex-1 flex-col items-center gap-1.5 rounded-lg border px-3 py-3 text-sm transition-colors ${
+                      theme === value
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border/30 text-muted-foreground hover:border-border hover:bg-muted/20'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="text-xs font-medium">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-                  <div className="mt-3 space-y-1.5">
-                    {archivedQueues.map((queue) => (
-                      <div
-                        key={queue.id}
-                        className="flex items-center gap-2 rounded-lg border border-border/10 bg-muted/20 px-3 py-2.5"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-muted-foreground line-through truncate">{queue.name}</p>
-                        </div>
-                        <button
-                          onClick={() => handleRestoreQueue(queue.id)}
-                          disabled={restoreQueue.isPending}
-                          className="rounded px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
-                        >
-                          Restore
-                        </button>
+            {/* ========== ARCHIVED ========== */}
+            <div className="border-t border-border/30" />
+            <section>
+              <h3 className="text-sm font-semibold text-foreground">Archived</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Archived departments can be restored at any time.
+              </p>
+
+              <div className="mt-3 space-y-1.5">
+                {archivedQueues && archivedQueues.length > 0 ? (
+                  archivedQueues.map((queue) => (
+                    <div
+                      key={queue.id}
+                      className="flex items-center gap-2 rounded-lg border border-border/10 bg-muted/20 px-3 py-2.5"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-muted-foreground line-through truncate">{queue.name}</p>
                       </div>
-                    ))}
-                  </div>
-                </section>
-              </>
-            )}
+                      <button
+                        onClick={() => handleRestoreQueue(queue.id)}
+                        disabled={restoreQueue.isPending}
+                        className="rounded px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        Restore
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="py-4 text-center text-xs text-muted-foreground">
+                    No archived queues.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* ========== DANGER ZONE ========== */}
+            <div className="border-t border-border/30" />
+            <section>
+              <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+              <div className="mt-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Account
+                </Button>
+              </div>
+            </section>
 
           </div>
         </div>

@@ -11,6 +11,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: z.string().url().optional().or(z.literal('').transform(() => undefined)),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required for email sending'),
+    RESEND_FROM_EMAIL: z.string().email().default('onboarding@resend.dev').transform((v) => `MediQueue <${v}>`),
   },
   client: {
     NEXT_PUBLIC_SOCKET_URL: z.string().url().default('http://localhost:3001'),
@@ -24,6 +25,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

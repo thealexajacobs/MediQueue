@@ -31,7 +31,7 @@ function formatDayLabel(label: string): string {
 export function AnalyticsDashboard() {
   const [period, setPeriod] = useState('today');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { data } = useAnalytics(period);
+  const { data, error, isError } = useAnalytics(period);
 
   const currentLabel = PERIODS.find((p) => p.value === period)?.label ?? 'Today';
 
@@ -97,7 +97,23 @@ export function AnalyticsDashboard() {
             </div>
           </div>
 
-          {!hasData ? (
+          {isError ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
+                <BarChart3 className="h-8 w-8 text-destructive/60" />
+              </div>
+              <h2 className="text-xl font-semibold text-foreground">Failed to load analytics</h2>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                {error instanceof Error ? error.message : 'Something went wrong. Please try again.'}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+              >
+                Retry
+              </button>
+            </div>
+          ) : !hasData ? (
             !data ? (
               <>
                 <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">

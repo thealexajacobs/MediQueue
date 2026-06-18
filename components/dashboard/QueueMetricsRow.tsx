@@ -33,7 +33,7 @@ export const QueueMetricsRow = memo(function QueueMetricsRow({
         return (
           <div
             key={m.label}
-            className="relative overflow-hidden rounded-xl border border-border/20 bg-card/40 p-3 shadow-sm backdrop-blur-md sm:rounded-2xl sm:p-5"
+            className="relative overflow-hidden rounded-xl border border-border/20 bg-card p-3 shadow-sm sm:rounded-2xl sm:p-5"
           >
             <div className="relative z-10 flex flex-row items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-10 sm:w-10 sm:rounded-xl">

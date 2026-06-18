@@ -8,11 +8,12 @@ import { signOut } from 'next-auth/react';
 
 interface TopBarProps {
   clinicName: string;
+  clinicLogo?: string | null;
   hideExtras?: boolean;
   onSettingsClick?: () => void;
 }
 
-export function TopBar({ clinicName, hideExtras, onSettingsClick }: TopBarProps) {
+export function TopBar({ clinicName, clinicLogo, hideExtras, onSettingsClick }: TopBarProps) {
   const router = useRouter();
   const [showProfile, setShowProfile] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -43,8 +44,15 @@ export function TopBar({ clinicName, hideExtras, onSettingsClick }: TopBarProps)
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setShowProfile((p) => !p)}
-              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
             >
+              {clinicLogo ? (
+                <img src={clinicLogo} alt="" className="h-6 w-6 rounded-md object-cover" />
+              ) : (
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-[10px] font-bold text-primary">
+                  {clinicName.charAt(0)}
+                </div>
+              )}
               <span className="text-primary">{clinicName}</span>
               <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showProfile ? 'rotate-180' : ''}`} />
             </button>

@@ -82,7 +82,7 @@ export function RegisterForm() {
           type="text"
           autoFocus
           autoComplete="organization"
-          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${clinicNameVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0 ${clinicNameVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
           {...register('clinicName')}
         />
         {errors.clinicName && (
@@ -98,7 +98,7 @@ export function RegisterForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${emailVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
+          className={`h-11 w-full rounded-sm border border-input px-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0 ${emailVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
           {...register('email')}
         />
         {errors.email && (
@@ -115,7 +115,7 @@ export function RegisterForm() {
             id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
-            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${passwordVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
+            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0 ${passwordVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
             {...register('password')}
           />
           {passwordVal ? (
@@ -142,7 +142,7 @@ export function RegisterForm() {
             id="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
             autoComplete="new-password"
-            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:ring-2 focus:ring-primary focus:ring-offset-0 ${confirmPasswordVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
+            className={`h-11 w-full rounded-sm border border-input pr-10 pl-3 text-foreground placeholder:text-muted-foreground transition-all duration-[400ms] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0 ${confirmPasswordVal ? 'bg-inverse-on-surface' : 'bg-card'}`}
             {...register('confirmPassword')}
           />
           {confirmPasswordVal ? (

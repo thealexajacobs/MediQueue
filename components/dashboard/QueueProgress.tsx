@@ -27,7 +27,7 @@ export function QueueProgress({ entries }: QueueProgressProps) {
     .slice(0, 10);
 
   return (
-    <div className="rounded-2xl border border-border/20 bg-card/40 p-5 shadow-sm backdrop-blur-md">
+    <div className="rounded-2xl border border-border/20 bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground drop-shadow-sm">
           Next Up

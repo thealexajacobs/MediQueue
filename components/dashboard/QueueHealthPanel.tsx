@@ -10,10 +10,11 @@ interface QueueHealthPanelProps {
 
 function StatusDot({ status }: { status: 'healthy' | 'busy' | 'delayed' }) {
   const colors = { healthy: 'bg-emerald-500', busy: 'bg-amber-500', delayed: 'bg-red-500' };
+  const pulseColors = { healthy: 'bg-emerald-500', busy: 'bg-amber-500', delayed: 'bg-red-500' };
   return (
     <span className="relative flex h-2.5 w-2.5">
       <span
-        className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${colors[status]}`}
+        className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${pulseColors[status]}`}
       />
       <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${colors[status]}`} />
     </span>
@@ -32,19 +33,19 @@ function MetricRow({
   icon: React.ReactNode;
 }) {
   const bg = {
-    healthy: 'bg-emerald-50 border-emerald-200',
-    busy: 'bg-amber-50 border-amber-200',
-    delayed: 'bg-red-50 border-red-200',
+    healthy: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800',
+    busy: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800',
+    delayed: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800',
   };
   const text = {
-    healthy: 'text-emerald-700',
-    busy: 'text-amber-700',
-    delayed: 'text-red-700',
+    healthy: 'text-emerald-700 dark:text-emerald-300',
+    busy: 'text-amber-700 dark:text-amber-300',
+    delayed: 'text-red-700 dark:text-red-300',
   };
 
   return (
     <div className={`flex items-center gap-3 rounded-lg border p-3 ${bg[status]}`}>
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/60">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/60 dark:bg-black/20">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -82,10 +83,10 @@ export function QueueHealthPanel({
         <span
           className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
             overallStatus === 'healthy'
-              ? 'bg-emerald-50 text-emerald-700'
+              ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
               : overallStatus === 'busy'
-                ? 'bg-amber-50 text-amber-700'
-                : 'bg-red-50 text-red-700'
+                ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300'
+                : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300'
           }`}
         >
           <span
@@ -114,9 +115,9 @@ export function QueueHealthPanel({
           status={overallStatus}
           icon={
             overallStatus === 'healthy' ? (
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             )
           }
         />
@@ -124,19 +125,19 @@ export function QueueHealthPanel({
           label="Wait Prediction"
           value={`~${avgWaitTime} min average`}
           status={waitStatus}
-          icon={<Clock className="h-4 w-4 text-violet-600" />}
+          icon={<Clock className="h-4 w-4 text-violet-600 dark:text-violet-400" />}
         />
         <MetricRow
           label="Throughput"
           value={`${throughput} patients/hr`}
           status={throughputStatus}
-          icon={<TrendingUp className="h-4 w-4 text-sky-600" />}
+          icon={<TrendingUp className="h-4 w-4 text-sky-600 dark:text-sky-400" />}
         />
         <MetricRow
           label="Completion Rate"
           value={`${completionRate}% today`}
           status={completionStatus}
-          icon={<Zap className="h-4 w-4 text-amber-600" />}
+          icon={<Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />}
         />
       </div>
     </div>

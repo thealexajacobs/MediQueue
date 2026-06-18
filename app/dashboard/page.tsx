@@ -12,12 +12,13 @@ export default async function DashboardPage() {
 
   const facility = await prisma.facility.findUnique({
     where: { id: session.user.facilityId },
-    select: { name: true },
+    select: { name: true, logo: true },
   });
 
   return (
     <DashboardShell
       clinicName={facility?.name ?? 'Facility'}
+      clinicLogo={facility?.logo}
       clinicId={session.user.facilityId}
       userName={session.user.name ?? ''}
       userEmail={session.user.email ?? ''}

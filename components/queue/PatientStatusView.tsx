@@ -40,8 +40,8 @@ const TIME_MARKS = [
 function StatusDot() {
   return (
     <span className="relative flex h-2 w-2">
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 dark:bg-emerald-500 opacity-75" />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
     </span>
   );
 }
@@ -149,8 +149,8 @@ export function PatientStatusView({ entryId }: PatientStatusViewProps) {
         <div className="mt-10 w-full max-w-sm">
           {isCompleted ? (
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20">
+                <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
               </div>
               <p className="text-xl font-semibold text-foreground">
                 {data.entry.status === 'COMPLETED' ? "You've been served!" : 'Entry skipped'}
@@ -165,9 +165,9 @@ export function PatientStatusView({ entryId }: PatientStatusViewProps) {
             <>
               {/* Now Serving Badge */}
               <div className="mb-8 text-center">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 dark:border-emerald-400/30 bg-emerald-500/10 dark:bg-emerald-500/20 px-3 py-1">
                   <StatusDot />
-                  <span className="text-xs font-semibold text-emerald-600">
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                     {data.serving ? 'Now Serving' : 'Queue is opening'}
                   </span>
                 </div>

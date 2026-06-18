@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useQueues, useCreateQueue } from '@/features/queues/hooks/useQueueMutations';
 import { useQueueStore } from '@/features/queues/hooks/useQueueStore';
 import { useQueueEntries } from '@/features/queue-entries/hooks/useQueueEntries';
@@ -28,18 +29,33 @@ const AddPatientModal = dynamic(
 
 interface DashboardShellProps {
   clinicName?: string;
+  clinicLogo?: string | null;
   clinicId?: string;
   userName?: string;
   userEmail?: string;
 }
 
-export function DashboardShell({ clinicName: propClinicName, clinicId, userName, userEmail }: DashboardShellProps) {
+export function DashboardShell({ clinicName: propClinicName, clinicLogo, clinicId, userName, userEmail }: DashboardShellProps) {
   const router = useRouter();
   const { data: queues, isLoading: queuesLoading } = useQueues();
   const selectedQueueId = useQueueStore((s) => s.selectedQueueId);
   const setSelectedQueueId = useQueueStore((s) => s.setSelectedQueueId);
   const { data: entries, isLoading: entriesLoading } = useQueueEntries(selectedQueueId);
   const { callNext, skip, complete } = useEntryMutations(selectedQueueId);
+
+  const { data: facility } = useQuery({
+    queryKey: ['facility', clinicId],
+    queryFn: async () => {
+      const res = await fetch('/api/clinics');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+      return json.data;
+    },
+    enabled: !!clinicId,
+  });
+
+  const clinicName = facility?.name ?? propClinicName ?? 'Facility';
+  const currentLogo = facility?.logo ?? clinicLogo;
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const stableEntriesRef = useRef(entries);
@@ -170,7 +186,8 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
 
       <div className="relative z-10 flex flex-col h-screen">
         <TopBar
-          clinicName={propClinicName ?? 'Facility'}
+          clinicName={clinicName}
+          clinicLogo={currentLogo}
           onSettingsClick={() => setIsSettingsOpen(true)}
         />
 
@@ -190,8 +207,8 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:flex-row">
-          <div className="min-w-0 flex-1 space-y-4 sm:space-y-6">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:flex-row">
+          <div className="min-w-0 flex-1 space-y-8 sm:space-y-6">
             {entriesLoading && !stableEntriesRef.current ? (
               <>
                 <div className="flex flex-col gap-4 sm:gap-6">
@@ -258,7 +275,8 @@ export function DashboardShell({ clinicName: propClinicName, clinicId, userName,
       <SettingsModal
         open={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        clinicName={propClinicName ?? 'Facility'}
+        clinicName={clinicName}
+        clinicLogo={currentLogo}
         clinicId={clinicId}
         userName={userName ?? ''}
         userEmail={userEmail ?? ''}
