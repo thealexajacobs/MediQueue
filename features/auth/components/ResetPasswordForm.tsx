@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
 
 function ResetFormInner() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get('token');
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setToken(params.get('token'));
+  }, []);
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -140,9 +144,5 @@ function ResetFormInner() {
 }
 
 export function ResetPasswordForm() {
-  return (
-    <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
-      <ResetFormInner />
-    </Suspense>
-  );
+  return <ResetFormInner />;
 }

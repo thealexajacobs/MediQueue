@@ -1,14 +1,18 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { RegisterForm } from '@/features/auth/components/RegisterForm';
 import { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm';
 import { ResetPasswordForm } from '@/features/auth/components/ResetPasswordForm';
 
 export function AuthPageContent() {
-  const searchParams = useSearchParams();
-  const mode = searchParams.get('mode') || 'login';
+  const [mode, setMode] = useState('login');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setMode(params.get('mode') || 'login');
+  }, []);
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col items-center space-y-6">
