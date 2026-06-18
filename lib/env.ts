@@ -5,7 +5,7 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     JWT_SECRET: z.string().min(32),
-    AUTH_URL: z.string().url().default('http://localhost:3000'),
+    AUTH_URL: z.string().url().default(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
     AUTH_TRUST_HOST: z.string().optional(),
     SOCKET_SERVER_URL: z.string().url().default('http://localhost:3001'),
     SOCKET_AUTH_TOKEN: z.string().optional(),
