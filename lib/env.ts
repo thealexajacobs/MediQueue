@@ -11,7 +11,7 @@ export const env = createEnv({
     SOCKET_AUTH_TOKEN: z.string().optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional().or(z.literal('').transform(() => undefined)),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-    RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required for email sending'),
+    RESEND_API_KEY: z.string().optional(),
     RESEND_FROM_EMAIL: z.string().email().default('onboarding@resend.dev').transform((v) => `MediQueue <${v}>`),
   },
   client: {
