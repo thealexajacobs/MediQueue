@@ -54,11 +54,11 @@
 
   [data-theme='dark'],
   .dark {
-    --background: 0 0% 11%;
+    --background: 0 0% 15%;
     --foreground: 0 0% 89%;
-    --card: 0 0% 11%;
+    --card: 0 0% 15%;
     --card-foreground: 0 0% 89%;
-    --popover: 0 0% 11%;
+    --popover: 0 0% 15%;
     --popover-foreground: 0 0% 89%;
     --primary: 196 68% 51%;
     --primary-foreground: 195 100% 14%;
@@ -84,10 +84,10 @@
     --color-on-surface-variant: 20 3% 78%;
     --color-inverse-primary: 194 100% 26%;
     --color-inverse-surface: 0 0% 89%;
-    --color-surface-dim: 0 0% 11%;
-    --color-surface-container-low: 0 0% 11%;
-    --color-surface-container: 0 0% 11%;
-    --color-surface-container-high: 0 0% 19%;
+    --color-surface-dim: 0 0% 15%;
+    --color-surface-container-low: 0 0% 15%;
+    --color-surface-container: 0 0% 17%;
+    --color-surface-container-high: 0 0% 21%;
   }
 }
 

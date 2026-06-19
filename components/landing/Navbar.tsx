@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
 
 const NAV_ITEMS = [
   { label: 'Features', href: '/#features' },
@@ -12,6 +14,7 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/[0.07] bg-background/70 backdrop-blur-xl">
@@ -36,6 +39,13 @@ export default function Navbar() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-3">
+          <button
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            className="hidden md:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground/50 transition-colors hover:bg-muted hover:text-muted-foreground"
+            aria-label="Toggle theme"
+          >
+            {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           <Link
             href="/auth"
             className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
@@ -78,6 +88,14 @@ export default function Navbar() {
                 {item.label}
               </a>
             ))}
+            <div className="my-1 h-px bg-border/40" />
+            <button
+              onClick={() => { setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'); setMenuOpen(false); }}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
             <div className="my-1 h-px bg-border/40" />
             <Link
               href="/auth"
