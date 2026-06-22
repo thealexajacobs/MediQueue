@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, ArrowRight, CheckCircle, Circle, CircleCheck, Layers, Users, ChevronRight } from 'lucide-react';
+import { Loader2, ArrowRight, CheckCircle, Circle, CircleCheck, Layers, Users, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const STEP_LABELS = ['Queue', 'Complete'];
 
@@ -292,12 +292,21 @@ export function OnboardingFlow() {
               })}
             </div>
 
-            <div className="pt-1">
+            <div className="pt-1 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDepartmentSelection(false)}
+                disabled={isLoading}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-transparent font-semibold text-foreground transition-all hover:bg-muted/50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </button>
               <button
                 type="button"
                 onClick={() => handleCreateQueues(selectedDepartments)}
                 disabled={isLoading || selectedDepartments.length === 0}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
